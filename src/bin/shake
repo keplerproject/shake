@@ -1,0 +1,35 @@
+#!/usr/bin/env lua
+-------------------------------------------------------------------------------
+-- Command line runner for Shake
+--
+-- Authors: Andre Carregal
+-- Copyright (c) 2007 Kepler Project
+--
+-- $Id: shake,v 1.1 2007/10/23 02:39:40 carregal Exp $
+-------------------------------------------------------------------------------
+
+require"shake"
+require"lfs"
+
+local recursive = (arg[1] == "-tree")
+
+local filename = recursive and (arg[2] or "test.lua") or (arg[1] or "test.lua")
+
+local run = shake.runner()
+
+print("Running tests...\n")
+
+if not recursive then
+    run:test(filename)
+else
+    for file in lfs.dir(".") do
+        local attr = lfs.attributes (file)
+        if attr.mode == "directory" and file ~= "." and file ~= ".." then
+            lfs.chdir(file)
+            run:test(filename, file)
+            lfs.chdir("..")
+        end
+    end
+end
+
+print(run:summary())
