@@ -4,17 +4,33 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.1 2007/10/23 02:39:40 carregal Exp $
+-- $Id: shake.lua,v 1.2 2007/10/24 23:41:04 carregal Exp $
 -------------------------------------------------------------------------------
+
+local debug = debug
+
+if not next(debug) then
+    -- uses a stub when debug information is not available
+    debug = {
+        getinfo = function() return {linenumber = "???"} end,
+        traceback = function() return "No traceback information: debug is not available" end,
+    }
+end
 
 local getinfo = debug.getinfo
 local traceback = debug.traceback
+
 local table = require "table"
 local io = require "io"
-local _G, error, loadfile, pcall, xpcall, ipairs, setmetatable = _G, error, loadfile, pcall, xpcall, ipairs, setmetatable
+local string = require "string"
+local _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
+      _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
+
+require "shake.stir"
 
 module(...)
 
+----------- local functions ------------
 
 -- Returns a new suite
 local function _newsuite(filename, title, errmsg)
@@ -35,19 +51,43 @@ end
 -- Returns a contextualized assert()
 
 function _newassert(suite, context)
-    return function(exp, msg)
-        local test = {passed = exp, message = msg or ""}
+    return function(val1, op, val2, msg, exp1, exp2, comments)
+        if comments then
+            context = _newcontext(comments)
+            suite.contexts[#suite.contexts + 1] = context
+        end        
+      
+        local test = { message = msg or "" }
         context.tests[#context.tests + 1] = test
-        if exp then
-            context.passed = context.passed + 1
-            suite.passed = suite.passed + 1
-        else
-            context.failed = context.failed + 1
-            suite.failed = suite.failed + 1
-            test.linenumber = getinfo(2, "l").currentline
-            test.traceback = traceback("", 2)
+
+        local PASSED = false
+
+        if not op then
+          PASSED = val1
+        elseif op == '==' then
+          PASSED = val1 == val2
+        elseif op == '~=' then
+          PASSED = val1 ~= val2
         end
-        return exp
+
+        if PASSED then
+          context.passed = context.passed + 1
+          suite.passed = suite.passed + 1
+        else
+          context.failed = context.failed + 1
+          suite.failed = suite.failed + 1
+          test.linenumber = getinfo(2, "l").currentline
+          test.traceback = traceback("", 2)
+        end
+
+        test.val1 = val1
+        test.op = op
+        test.val2 = val2
+        test.exp1 = exp1
+        test.exp2 = exp2
+
+        test.passed = PASSED
+        return PASSED, msg
     end
 end
 
@@ -56,21 +96,32 @@ end
 -- Test results are added to the results table
 -------------------------------------------------------------------------------
 local function _test(self, filename, title)
-    local f, errmsg = loadfile(filename)
+    local f
+    local file = io.open(filename)
+    if not file then
+        return
+    else
+        local s = file:read'*a'
+        s = string.gsub(s, "^#![^\n]*\n", "\n")
+        s = stir(s)
+        f, errmsg = loadstring(s, filename)
+    end
     local results = self.results
     title = title or ""
     if not f then
         -- error loading the file
+        errmsg = string.gsub(errmsg, '%[string "'..filename..'"%]', filename)
         results.suites[#results.suites + 1] = _newsuite(filename, title, errmsg)
         results.errors = results.errors + 1
     else
         -- runs the test suite
         local _print = _G.print
-        local _assert = _G.assert
         local _write = _G.io.write
+        local ___STIR_assert = _G.___STIR_assert
         local suite = _newsuite(filename, title)
+
         local context = _newcontext("")
-        _G.assert = _newassert(suite, context) -- so assert() works even without a previous context
+        _G.___STIR_assert = _newassert(suite, context) -- so assertions works even without a previous context
         suite.contexts[#suite.contexts + 1] = context
         
         -- separate contexts at every print or io.write
@@ -81,16 +132,20 @@ local function _test(self, filename, title)
                 -- create a new context if there was an assert before the previous context
                 context = _newcontext(...)
                 suite.contexts[#suite.contexts + 1] = context
-                _G.assert = _newassert(suite, context)
+            else
+                context.output[#context.output + 1] = table.concat({...})
             end
+            _G.___STIR_assert = _newassert(suite, context)
         end
         
         _G.io.write = _G.print
+        
         -- executes the suite
         local res, errmsg = xpcall(f, function(err) return err end)
         if not res then
             -- error executing the suite
-            suite.error = errmsg
+            errmsg = errmsg or ""
+            suite.error = string.gsub(errmsg, '%[string "'..filename..'"%]', filename)
             results.errors = results.errors + 1
         end
         results.passed = results.passed + suite.passed
@@ -98,8 +153,8 @@ local function _test(self, filename, title)
         results.suites[#results.suites + 1] = suite
         
         _G.print = _print
-        _G.assert = _assert
         _G.io.write = _write
+        _G.___STIR_assert = ___STIR_assert
     end
 end
 
@@ -118,21 +173,30 @@ local function _summary(self, sep)
             out[#out + 1] = ""
         elseif suite.failed > 0 then
             out[#out + 1] = "----------------   "..suite.title.." "..suite.filename.." failed!".."   ----------------"
-            out[#out + 1] = ""
             for cg, context in ipairs(suite.contexts) do
                 if context.failed > 0 then
-                    local output = table.concat(context.output)
-                    if output ~= "" then
+                    out[#out + 1] = ""
+                    for _, output in ipairs(context.output) do
                         out[#out + 1] = output
                     end
-                    local lines = ""
-                    local traceback = ""
+                    if context.comments then
+                      out[#out + 1] = context.comments
+                    end
                     for ct, test in ipairs (context.tests) do
                         if not test.passed then
-                            out[#out + 1] = "   #"..test.linenumber.." "..suite.source[test.linenumber]
+                            if suite.source[test.linenumber] then
+                                out[#out + 1] = "   #"..test.linenumber.." "..suite.source[test.linenumber]
+                            end
+                            
+                            if not isTerminal(test.exp1, test.val1) then
+                                out[#out + 1] = "   "..test.exp1.." -> ".._G.tostring(test.val1)
+                            end
+                            
+                            if not isTerminal(test.exp2, test.val2) then
+                                out[#out + 1] = "   "..test.exp2.." -> ".._G.tostring(test.val2)
+                            end
                         end
                     end
-                    out[#out + 1] = traceback
                 end
             end
         else
@@ -148,6 +212,8 @@ local function _summary(self, sep)
     return table.concat(out, sep)
 end 
 
+---------- public functions --------------
+
 
 -------------------------------------------------------------------------------
 -- Returns a new runner
@@ -156,4 +222,19 @@ function runner()
     local runner = {results = {passed = 0, failed = 0, errors = 0, suites = {} } }
     setmetatable(runner, {__index = {test = _test, summary = _summary} })
     return runner
+end
+
+-------------------------------------------------------------------------------
+-- Checks if an expression is a terminal value
+-------------------------------------------------------------------------------
+function isTerminal(exp, val)
+    if not exp then return end
+    local chunk = loadstring('return '..exp)
+    local env = {}
+    setmetatable(env, {__index = function() return "___nil___" end})
+    setfenv(chunk, env)
+    local status, ret = pcall(chunk)
+    if status then
+        return ret == val
+    end
 end

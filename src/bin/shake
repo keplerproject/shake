@@ -5,13 +5,13 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.1 2007/10/23 02:39:40 carregal Exp $
+-- $Id: shake,v 1.2 2007/10/24 23:41:04 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
 require"lfs"
 
-local recursive = (arg[1] == "-tree")
+local recursive = (arg[1] == "-tree" or arg[1] == "--tree" or arg[1] == "-t")
 
 local filename = recursive and (arg[2] or "test.lua") or (arg[1] or "test.lua")
 

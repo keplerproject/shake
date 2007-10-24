@@ -37,6 +37,7 @@
 <p>Here you have the number of tests, failures and errors for every test suite in <%= KEPLER_TESTS %></p>
 
 <%
+require"shake"
 local run = shake.runner()
 for file in lfs.dir(KEPLER_TESTS) do
     local attr = lfs.attributes (KEPLER_TESTS.."/"..file)
@@ -108,7 +109,7 @@ end
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a></p>
-	<p><small>$Id: shake.lp,v 1.1 2007/10/23 02:39:40 carregal Exp $</small></p>
+	<p><small>$Id: shake.lp,v 1.2 2007/10/24 23:41:05 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
