@@ -1,12 +1,23 @@
 -------------------------------------------------------------------------------
 -- Shake, a simple test engine for Lua
 --
--- Authors: Andre Carregal
+-- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.4 2007/10/25 20:44:44 carregal Exp $
+-- $Id: shake.lua,v 1.5 2007/10/25 23:14:57 carregal Exp $
 -------------------------------------------------------------------------------
 
+local io = require "io"
+local lfs = require "lfs"
+local table = require "table"
+local string = require "string"
+
+local _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
+      _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
+
+require "shake.stir"
+
+-- tries to get the debug table
 local debug = debug
 
 if not next(debug) then
@@ -19,14 +30,6 @@ end
 
 local getinfo = debug.getinfo
 local traceback = debug.traceback
-
-local table = require "table"
-local io = require "io"
-local string = require "string"
-local _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
-      _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
-
-require "shake.stir"
 
 module(...)
 
@@ -76,8 +79,6 @@ function _newassert(suite, context)
         else
           context.failed = context.failed + 1
           suite.failed = suite.failed + 1
-          test.linenumber = getinfo(2, "l").currentline
-          test.traceback = traceback("", 2)
         end
 
         test.val1 = val1
@@ -87,6 +88,8 @@ function _newassert(suite, context)
         test.exp2 = exp2
 
         test.passed = PASSED
+        test.linenumber = getinfo(2, "l").currentline
+        test.traceback = traceback("", 2)
         return PASSED, msg
     end
 end
@@ -211,6 +214,8 @@ local function _summary(self, sep)
     out[#out + 1] = ""
     return table.concat(out, sep)
 end 
+
+
 
 ---------- public functions --------------
 
