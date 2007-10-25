@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.3 2007/10/25 00:14:45 carregal Exp $
+-- $Id: shake.lua,v 1.4 2007/10/25 20:44:44 carregal Exp $
 -------------------------------------------------------------------------------
 
 local debug = debug
@@ -228,7 +228,7 @@ end
 -- Checks if an expression is a terminal value
 -------------------------------------------------------------------------------
 function isTerminal(exp, val)
-    if not exp then return end
+    if not exp then return true end
     local chunk = loadstring('return '..exp)
     local env = {}
     setmetatable(env, {__index = function() return "___nil___" end})
