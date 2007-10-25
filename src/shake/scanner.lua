@@ -25,6 +25,8 @@ local N = m.R'09'
 -- alphanumeric pattern
 local AZ = m.R('__','az','AZ','\127\255')     -- llex.c uses isalpha()
 
+-- punctuation pattern. Used only in text2string
+local PUNCTUATION = m.S'!@$&|?~`´'
 
 ------------------------------ FUNCTIONS --------------------------------------
 
@@ -196,8 +198,7 @@ function text2string(text)
     
     if c then 
       return c
-    elseif AZ:match(char) or N:match(char) 
-        or SPACE:match(char) or OPERATOR:match(char) then
+    elseif (AZ + N + SPACE + OPERATOR + PUNCTUATION):match(char) then
       return char
     else
       return '\\'..string.byte(char)
@@ -372,3 +373,46 @@ IGNORE = (SPACE + COMMENT)^0
 -- Matches any token, comment or space.
 -- <exp>LPeg patt</exp>
 ANY = TOKEN + COMMENT + SPACE -- TEMP: + error'invalid character'
+
+--[=[
+<project>
+<title>Lua 5.1 Scanner</title>
+<description>Lexical scanner module</description>
+<author>Humberto Anjos and Francisco Sant'Anna</author>
+</project>
+
+# Description
+
+This module exports several Lua lexical patterns, all implemented in <a href="http://www.inf.puc-rio.br/~roberto/lpeg.html">LPeg</a>.
+None of them have captures.
+
+# Dependencies
+
+* <a href="http://www.inf.puc-rio.br/~roberto/lpeg.html">LPeg</a>; and 
+* @util.lua@.
+
+# Example
+
+The following example lists all tokens in a Lua script:
+
+<example>
+local lpeg = require 'lpeg'
+local scanner = require 'l2.scanner'
+
+-- -- this pattern captures all tokens, ignores spaces and comments,
+-- -- and matches with end of file, giving an error otherwise
+patt = (lpeg.C(scanner.TOKEN) + scanner.SPACE + scanner.COMMENT)^0
+     %* (scanner.EOF + scanner.error'invalid character')
+patt = lpeg.Ct(patt)
+
+-- -- opens the file passed as parameter and tries to match with patt
+f = assert(io.open(arg[1]))
+ALL = patt:match(f:read'%*a')
+f:close()
+
+-- -- dumps all tokens on screen
+for _, tk in ipairs(ALL) do
+    print(tk)
+end
+</example>
+--]=]

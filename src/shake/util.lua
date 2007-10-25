@@ -90,6 +90,24 @@ function pr (t)
 end
 
 --[[
+--]]
+function removeNewline(comment)
+  if type(comment) == 'string' then -- é um comentário isolado
+    if comment:sub(-1, -1) == '\n' then
+      return comment:sub(1, -2)
+    else
+      return comment
+    end
+  elseif type(comment) == 'table' then -- é uma lista de comentários
+    for i, v in ipairs(comment) do
+      comment[i] = removeNewline(v) 
+    end
+    
+    return comment
+  end
+end
+
+--[[
 Converts the table `t` into a properly indented string, showing all its keys and values. 
 String keys are always shown first, followed by numeric keys
 
