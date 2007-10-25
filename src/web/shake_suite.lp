@@ -15,6 +15,7 @@
 
 -- test directory
 local KEPLER_TESTS = KEPLER_TESTS or ""
+local target = cgilua.QUERY.s
 
 %>
 
@@ -68,17 +69,14 @@ table.sort(suites)
 
 <div id="content">
 
-<h1>Shake Summary</h1>
+<h1>Shake details for the <%= target %> suite</h1>
 
-<p>Here you have the number of tests, failures and errors for every test suite in <%= KEPLER_TESTS %></p>
+<p>Here you a more detailed view of the <%= target %> tests results:</</p>
 
 <%
 local run = shake.runner()
-for _, suite in ipairs(suites) do
-    lfs.chdir(KEPLER_TESTS.."/"..suite)
-    run:test("test.lua", suite)
-    lfs.chdir("..")
-end
+lfs.chdir(KEPLER_TESTS.."/"..target)
+run:test("test.lua", target)
 %>
 
 <table class="shake">
@@ -110,16 +108,67 @@ end
         end
         cgilua.put("</tr>\n")
     end
-    cgilua.put("<tfoot>")
-    cgilua.put("<tr>\n")
-    cgilua.put("<th><strong>Totals</strong></th>\n")
-    cgilua.put("<td>"..results.failed + results.passed.."</td>\n")
-    cgilua.put([[<td class="]]..((results.failed > 0) and ([[failed">]]..results.failed) or [[passed">]]).."</td>\n")
-    cgilua.put([[<td class="]]..((results.errors > 0) and ([[error">]]..results.errors) or [[noerror">]]).."</td>\n")
-    cgilua.put("</tr>\n")
-    cgilua.put("</tfoot>")
 %>
 </table>
+
+<%
+    local results = run.results
+    for _, suite in ipairs(results.suites) do
+        if suite.error then
+            cgilua.put("<p><strong>ERROR</strong>:</p>")
+            cgilua.put("<p>"..suite.error.."</p>")
+        else
+            for _, context in ipairs(suite.contexts) do
+                if next(context.tests) then
+                    cgilua.put("<p>")
+                    for _, output in ipairs(context.output) do
+                        cgilua.put(output.."<br />")
+                    end
+                    if context.comments then
+                        cgilua.put(context.comments.."<br />")
+                    end
+                    cgilua.put("</p>")
+%>
+                    <table class="shake">
+                        <thead>
+                            <tr>
+                                <th scope="col">Line #</th>
+                                <th scope="col"></th>
+                                <th scope="col"><strong>Expected</strong></th>
+                                <th scope="col"><strong>Actual</strong></th>
+                                <th scope="col"><strong>Message</strong></th>
+                            </tr>
+                        </thead>
+<%                    
+                    for _, test in ipairs (context.tests) do
+                        local linenumber = test.linenumber or "???"
+                        local op = test.op
+                        local val2 = tostring(test.val2)
+                        
+                        if not op then
+                            val2 = "<em>True</em>"
+                        end
+                        
+                        if not op or op == "==" then
+                            op = ""
+                        end
+                        
+                        cgilua.put("<tr>")
+                        cgilua.put("<td>"..linenumber.."</td>")
+                        cgilua.put("<td>"..test.exp1.."</td>")
+                        cgilua.put("<td>"..op..val2.."</td>")
+                        cgilua.put("<td>"..tostring(test.val1).."</td>")
+                        cgilua.put("<td>"..(test.msg or "").."</td>")
+                        cgilua.put("</tr>")
+                    end
+%>
+                    </table>
+<%
+                end
+            end
+        end
+    end
+%>
 
 <% if results.errors > 0 or results.failed > 0 then %>
 <p>Shake output:</p>
@@ -141,7 +190,7 @@ end
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a></p>
-	<p><small>$Id: shake.lp,v 1.3 2007/10/25 23:15:34 carregal Exp $</small></p>
+	<p><small>$Id: shake_suite.lp,v 1.1 2007/10/25 23:15:34 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
