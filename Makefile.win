@@ -1,0 +1,14 @@
+# $Id: Makefile.win,v 1.1 2007/10/25 18:48:11 carregal Exp $
+
+include config.win
+
+ROOT_LUAS = src\shake\shake.lua 
+SHAKE_LUAS= src\shake\grammar.lua src\shake\parser.lua src\shake\scanner.lua src\shake\stir.lua src\shake\util.lua
+WEBS= web\shake.lp
+CSS= web\css\shake.css
+
+install:
+	IF NOT EXIST $(LUA_DIR) mkdir $(LUA_DIR)
+	IF NOT EXIST $(LUA_DIR)\shake mkdir $(LUA_DIR)\shake
+	FOR %i IN ($(SHAKE_LUAS)) DO copy %i $(LUA_DIR)\shake 
+	copy $(ROOT_LUAS) $(LUA_DIR)\

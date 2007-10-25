@@ -1,0 +1,15 @@
+# $Id: config,v 1.1 2007/10/25 18:48:11 carregal Exp $
+
+# System's libraries directory (where binary libraries are installed)
+LUA_LIBDIR= /usr/local/lib/lua/5.1
+
+# System's lua directory (where Lua libraries are installed)
+LUA_DIR= /usr/local/share/lua/5.1
+
+# System's executables directory (where binary or script executables are installed)
+SYS_BINDIR= /usr/local/bin
+
+# Complete path to Lua command line interpreter
+LUA_INTERPRETER= /usr/local/bin/lua
+
+VERSION= 1.0
