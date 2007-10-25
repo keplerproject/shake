@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.2 2007/10/24 23:41:04 carregal Exp $
+-- $Id: shake.lua,v 1.3 2007/10/25 00:14:45 carregal Exp $
 -------------------------------------------------------------------------------
 
 local debug = debug
@@ -102,7 +102,7 @@ local function _test(self, filename, title)
         return
     else
         local s = file:read'*a'
-        s = string.gsub(s, "^#![^\n]*\n", "\n")
+        s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of the #! one\n")
         s = stir(s)
         f, errmsg = loadstring(s, filename)
     end
