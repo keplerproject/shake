@@ -6,7 +6,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.8 2007/10/29 15:55:45 hanjos Exp $
+-- $Id: shake,v 1.9 2007/10/29 19:47:41 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -25,7 +25,7 @@ end
 
 local filename = arg[1] or user_test
 
-local tested = false
+_tested = false
 
 local run = shake.runner()
 
@@ -43,32 +43,32 @@ local function _testlocal(title)
 	end
 end		
 
-local function _iterate(path)
-    local tested
+local function _iterate()
     for dir in lfs.dir(".") do
         local attr = lfs.attributes (dir)
         if attr.mode == "directory" and dir ~= "." and dir ~= ".." then
             lfs.chdir(dir)
 			if _testlocal(dir) then
-                tested = true
+                _tested = true
+            else
+                _iterate()
             end
 			lfs.chdir("..")
         end
     end
-    return tested
 end
 
 if recursive then
    print("Shaking the tree...\n")
 end
 
-tested = _testlocal()
-
-if not tested and recursive then
-    tested = _iterate("")
+if _testlocal() then
+    _tested = true
+elseif recursive then
+    _iterate()
 end
 
-if tested then
+if _tested then
     print(run:summary())
 else
     print("No test files found")
