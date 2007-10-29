@@ -47,7 +47,7 @@ table.sort(suites)
 
 <h1>Shake</h1>
 	<ul>
-        <li><strong><a href="shake.lp">All</a></strong>
+        <li><strong><a href="shake.lp">All Suites</a></strong>
         <ul>
             <%
             for _,suite in ipairs(suites) do
@@ -57,7 +57,7 @@ table.sort(suites)
             end
             if not next(suites) then
             %>
-            <li><strong>(None)</strong></li>
+            <li><strong>(No suites)</strong></li>
             <%
             end
             %>
@@ -73,6 +73,7 @@ table.sort(suites)
 <p>Here you have the number of tests, failures and errors for every test suite in <%= KEPLER_TESTS %></p>
 
 <%
+require"shake"
 local run = shake.runner()
 for _, suite in ipairs(suites) do
     lfs.chdir(KEPLER_TESTS.."/"..suite)
@@ -94,7 +95,7 @@ end
     local results = run.results
     for cs, suite in ipairs(results.suites) do
         cgilua.put("<tr>\n")
-        cgilua.put("<th><strong>"..suite.title.."</strong></th>\n")
+        cgilua.put("<th><strong>"..[[<a href="shake_suite.lp?s=]]..suite.title..[[">]]..suite.title..[[</a></strong></th>]].."\n".."</strong></th>\n")
         if suite.error then
             cgilua.put([[<td>]]..suite.passed + suite.failed.."</td>\n")
             cgilua.put([[<td]]..(((suite.failed > 0) and [[ class="failed">]]..suite.failed) or ">").."</td>\n")
@@ -141,7 +142,7 @@ end
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a></p>
-	<p><small>$Id: shake.lp,v 1.3 2007/10/25 23:15:34 carregal Exp $</small></p>
+	<p><small>$Id: shake.lp,v 1.4 2007/10/29 20:19:05 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

@@ -71,9 +71,10 @@ table.sort(suites)
 
 <h1>Shake details for the <%= target %> suite</h1>
 
-<p>Here you a more detailed view of the <%= target %> tests results:</</p>
+<p>Here you have a more detailed view of the <%= target %> tests results:</</p>
 
 <%
+require"shake"
 local run = shake.runner()
 lfs.chdir(KEPLER_TESTS.."/"..target)
 run:test("test.lua", target)
@@ -114,20 +115,24 @@ run:test("test.lua", target)
 <%
     local results = run.results
     for _, suite in ipairs(results.suites) do
-        if suite.error then
+        if suite.error == -1 then
             cgilua.put("<p><strong>ERROR</strong>:</p>")
             cgilua.put("<p>"..suite.error.."</p>")
         else
             for _, context in ipairs(suite.contexts) do
                 if next(context.tests) then
-                    cgilua.put("<p>")
-                    for _, output in ipairs(context.output) do
-                        cgilua.put(output.."<br />")
+                    if context.output[1] ~= "" or context.comments then
+                        cgilua.put([[<div class="shakecontext">]].."\n")
+                        for _, output in ipairs(context.output) do
+                            if output and output ~= "" then
+                                cgilua.put([[<div class="shakeoutput">]]..output.."</div>\n")
+                            end
+                        end
+                        if context.comments and context.comments ~= "" then
+                            cgilua.put([[<div class="shakecomment">]]..context.comments.."</div>\n")
+                        end
+                        cgilua.put("</div>")
                     end
-                    if context.comments then
-                        cgilua.put(context.comments.."<br />")
-                    end
-                    cgilua.put("</p>")
 %>
                     <table class="shake">
                         <thead>
@@ -146,7 +151,7 @@ run:test("test.lua", target)
                         local val2 = tostring(test.val2)
                         
                         if not op then
-                            val2 = "<em>True</em>"
+                            val2 = "<em><strong>True value</strong></em>"
                         end
                         
                         if not op or op == "==" then
@@ -154,11 +159,19 @@ run:test("test.lua", target)
                         end
                         
                         cgilua.put("<tr>")
-                        cgilua.put("<td>"..linenumber.."</td>")
-                        cgilua.put("<td>"..test.exp1.."</td>")
-                        cgilua.put("<td>"..op..val2.."</td>")
-                        cgilua.put("<td>"..tostring(test.val1).."</td>")
-                        cgilua.put("<td>"..(test.msg or "").."</td>")
+                        local testclass = "passed"
+                        if not test.passed then
+                            testclass = "failed"
+                        end
+                        cgilua.put([[<td class="]]..testclass..[[">]]..linenumber.."</td>")
+                        cgilua.put([[<td class="]]..testclass..[[">]]..test.exp1.."</td>")
+                        cgilua.put([[<td class="]]..testclass..[[">]]..op..val2.."</td>")
+                        cgilua.put([[<td class="]]..testclass..[[">]]..tostring(test.val1).."</td>")
+                        if not test.passed then
+                            cgilua.put([[<td class="]]..testclass..[[">]]..(test.msg or "").."</td>")
+                        else
+                            cgilua.put([[<td class="]]..testclass..[[">]].."</td>")
+                        end
                         cgilua.put("</tr>")
                     end
 %>
@@ -190,7 +203,7 @@ run:test("test.lua", target)
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a></p>
-	<p><small>$Id: shake_suite.lp,v 1.1 2007/10/25 23:15:34 carregal Exp $</small></p>
+	<p><small>$Id: shake_suite.lp,v 1.2 2007/10/29 20:19:05 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
