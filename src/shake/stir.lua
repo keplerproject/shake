@@ -28,14 +28,6 @@ local S = scanner.IGNORE
 -- casa com espaços
 local SPACES = scanner.SPACE^0
 
--- casa com todos os caracteres até achar delim, ignorando espaços
-local function matchUntil(delim)
-  delim = m.P(delim) -- garantindo que delim é um padrão LPeg
-
-  -- evitando capturar espaços entre a expressão e delim
-  return (1 - (S* delim))^0 
-end
-
 -- só para imprimir o conteúdo de uma lista na tela
 local function list2string(t, level)
   level = level or 0
@@ -147,7 +139,7 @@ local EXP = S* (grammar.apply(parser.rules,
   })) 
 
 -- casa e captura a mensagem
-local MSG = S* m.C(matchUntil(CLOSE))
+local MSG = S* m.C(grammar.apply(parser.rules, m.V'Exp'))
 
 -- casa e captura um comentário
 local COMMENT = m.C((scanner.COMMENT * m.P'\n'^-1) ^ 1)
@@ -191,7 +183,7 @@ local function buildNewAssert(info)
   local str2 = (exp2 == nil) and 'nil' or scanner.text2string(exp2)
   local com = (comment == nil) and 'nil' or scanner.text2string(comment)
   local textStr = scanner.text2string(text)
-  return newassert..'___STIR_assert('..exp1
+  newassert = newassert..'___STIR_assert('..exp1
     ..', '..(op and '"'..op..'"' or 'nil')
     ..', '..(exp2 or 'nil')
     ..', '..(msg or 'nil')
@@ -200,6 +192,9 @@ local function buildNewAssert(info)
     ..', '..com
     ..', '..textStr
     ..')'
+  
+  --print(newassert)
+  return newassert
 end
 
 -- substitui a substring de str de i a j pela new_str

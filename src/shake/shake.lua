@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.5 2007/10/25 23:14:57 carregal Exp $
+-- $Id: shake.lua,v 1.6 2007/10/29 15:55:45 hanjos Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -107,6 +107,7 @@ local function _test(self, filename, title)
         local s = file:read'*a'
         s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of the #! one\n")
         s = stir(s)
+        
         f, errmsg = loadstring(s, filename)
     end
     local results = self.results
