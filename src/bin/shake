@@ -1,41 +1,59 @@
-#!/usr/bin/env lua
+#!/Users/carregal/kepler/bin/lua5.1
 -------------------------------------------------------------------------------
 -- Command line runner for Shake
 --
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.3 2007/10/25 23:13:42 carregal Exp $
+-- $Id: shake,v 1.4 2007/10/29 03:27:27 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
 
-local default = "test.lua"
-local filename = arg[1] or default
+-- Shake looks first for a shake_test file and runs it if present,
+-- otherwise it looks for a user_test file and runs it if present
+
+local shake_test = "shake_test.lua"
+local user_test = "test.lua"
+local recursive = false
+
+if arg[1] == "-r" then
+	recursive = true
+	table.remove(arg)
+end
+
+local filename = arg[1] or user_test
 
 local run = shake.runner()
 
-local function _iterate(path, testfile)
+local function _testlocal()
+	local f, errmsg = loadfile(shake_test)
+	if f then
+		f(run)
+		return true
+	end
+	f, errmsg = loadfile(user_test)
+	if f then
+		f(run)
+		return true
+	end
+end		
+
+local function _iterate(path)
     for dir in lfs.dir(".") do
         local attr = lfs.attributes (dir)
         if attr.mode == "directory" and dir ~= "." and dir ~= ".." then
             lfs.chdir(dir)
-            if io.open(testfile) then
-                run:test(testfile, dir)
-            else
-                _iterate(path.."/"..dir)
-            end
-            lfs.chdir("..")
+			_testlocal()
+			lfs.chdir("..")
         end
     end
 end
 
 print("Running tests...\n")
 
-if io.open(filename) then
-    run:test(filename)
-else
-    _iterate("", default)
+if not _testlocal() and recursive then
+    _iterate("")
 end
 
 print(run:summary())
