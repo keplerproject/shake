@@ -1,11 +1,11 @@
-#!/usr/bin/env lua5
+#!/usr/bin/env lua
 -------------------------------------------------------------------------------
 -- Command line runner for Shake
 --
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.6 2007/10/29 15:23:54 carregal Exp $
+-- $Id: shake,v 1.7 2007/10/29 15:31:29 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -24,6 +24,8 @@ end
 
 local filename = arg[1] or user_test
 
+local tested = false
+
 local run = shake.runner()
 
 local function _testlocal(title)
@@ -41,20 +43,32 @@ local function _testlocal(title)
 end		
 
 local function _iterate(path)
+    local tested
     for dir in lfs.dir(".") do
         local attr = lfs.attributes (dir)
         if attr.mode == "directory" and dir ~= "." and dir ~= ".." then
             lfs.chdir(dir)
-			_testlocal(dir)
+			if _testlocal(dir) then
+                tested = true
+            end
 			lfs.chdir("..")
         end
     end
+    return tested
 end
 
-print("Running tests...\n")
-
-if not _testlocal() and recursive then
-    _iterate("")
+if recursive then
+   print("Shaking the tree...\n")
 end
 
-print(run:summary())
+tested = _testlocal()
+
+if not tested and recursive then
+    tested = _iterate("")
+end
+
+if tested then
+    print(run:summary())
+else
+    print("No test files found")
+end
