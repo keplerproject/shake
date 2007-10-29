@@ -5,7 +5,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.4 2007/10/29 03:27:27 carregal Exp $
+-- $Id: shake,v 1.5 2007/10/29 15:09:01 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -26,15 +26,16 @@ local filename = arg[1] or user_test
 
 local run = shake.runner()
 
-local function _testlocal()
+local function _testlocal(title)
 	local f, errmsg = loadfile(shake_test)
 	if f then
+        -- passes the runner to shake_test
 		f(run)
 		return true
 	end
 	f, errmsg = loadfile(user_test)
 	if f then
-		f(run)
+		run:test(user_test, title)
 		return true
 	end
 end		
@@ -44,7 +45,7 @@ local function _iterate(path)
         local attr = lfs.attributes (dir)
         if attr.mode == "directory" and dir ~= "." and dir ~= ".." then
             lfs.chdir(dir)
-			_testlocal()
+			_testlocal(dir)
 			lfs.chdir("..")
         end
     end
