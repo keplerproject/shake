@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.6 2007/10/29 15:55:45 hanjos Exp $
+-- $Id: shake.lua,v 1.7 2007/10/29 20:17:15 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -86,7 +86,7 @@ function _newassert(suite, context)
         test.val2 = val2
         test.exp1 = exp1
         test.exp2 = exp2
-
+        test.msg = msg
         test.passed = PASSED
         test.linenumber = getinfo(2, "l").currentline
         test.traceback = traceback("", 2)
