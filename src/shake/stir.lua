@@ -1,9 +1,9 @@
--- módulos básicos
-local _G = _G
+-- basic modules
+local _G     = _G
 local string = string
-local table = table
+local table  = table
 
--- funções básicas
+-- basic functions
 local ipairs = ipairs
 local pairs = pairs
 local print = print
@@ -11,24 +11,24 @@ local require = require
 local tostring = tostring
 local type = type
 
--- módulos importados
+-- imported modules
 local m       = require 'lpeg'
 local scanner = require 'shake.scanner'
 local parser  = require 'shake.parser'
 local grammar = require 'shake.grammar'
 
--- declaração de módulo
+-- module declaration
 module 'shake'
 
--- FUNÇÕES E VALORES AUXILIARES ------------
+-- HELPER VALUES AND FUNCTIONS ------------
 
--- casa com um ou mais caracteres "ignoráveis" (espaços e comentários)
+-- matches one or more "ignorable" strings (spaces or comments)
 local S = scanner.IGNORE
 
--- casa com espaços
+-- matches all space characters
 local SPACES = scanner.SPACE^0
 
--- só para imprimir o conteúdo de uma lista na tela
+-- pretty-prints a list on screen, here for debugging purposes
 local function list2string(t, level)
   level = level or 0
   local indent = string.rep('  ', level)
@@ -50,7 +50,7 @@ local function list2string(t, level)
   end
 end
 
--- tabela de precedência de operadores em Lua 5.1
+-- Lua 5.1 operator precedence table
 local ops = {
   ['or'] =  { precedence = 1, left = true, arity = 2 },
   ['and'] = { precedence = 2, left = true, arity = 2 },
@@ -73,10 +73,9 @@ local ops = {
 }
 
 
--- algoritmo de precedência de operadores, modificado para achar o índice do 
--- operador mais externo
+-- operator precedence algorithm, adapted to find the outmost binary operator's
+-- index in list
 local function getOuterOp(list)
-  local queue = {}
   local stack = {}
   
   local function makeNode(index, node)
@@ -84,19 +83,18 @@ local function getOuterOp(list)
   end
   
   for i, v in ipairs(list) do
-    if ops[v] then -- é um operador binário
+    if ops[v] then -- it's an operator, and in this case, binary
       local top, op = stack[#stack], ops[v]
       while top 
         and ((op.right and op.precedence < ops[top.node].precedence)
           or (op.left and op.precedence <= ops[top.node].precedence)) do
         
-        queue[#queue + 1] = table.remove(stack)
+        table.remove(stack)
+        
         top = stack[#stack]
       end
       
       stack[#stack + 1] = makeNode(i, v)
-    else
-      queue[#queue + 1] = v
     end
   end
   
@@ -104,57 +102,58 @@ local function getOuterOp(list)
   return stack[1] and stack[1].index
 end
 
--- TOKENS ESPECIAIS ------------------------
--- OBS.:
--- espaços foram incluidos nos tokens para evitar escrever *S* a toda hora
+-- SPECIAL TOKENS ------------------------
 
--- abre parênteses
+-- pretty obvious, isn't it?
 local OPEN = S* m.P'('
 
--- fecha parênteses
+-- same here
 local CLOSE = S* m.P')'
 
--- vírgula
+-- self explaining pattern
 local COMMA = S* m.P','
 
--- capturando o operador especial, que pode ser ~= ou ==
+-- the special operators, here == and ~=
 local OP = S* m.C(m.P'~=' + m.P'==')
 
--- casa e captura uma expressão
+-- matches and captures a Lua expression. The capture may return either a 
+-- single expression or an expression, an operator (matched by OP) and an 
+-- expression
 local EXP = S* (grammar.apply(parser.rules, 
   m.C(m.V'_SimpleExp') * (S* m.C(m.V'BinOp') *S* m.C(m.V'_SimpleExp'))^0,
-  {
+  { -- the capture table
     [1] = function (...)
       local infix = { ... }
       local outerOp = getOuterOp(infix)
       
       if OP:match(infix[outerOp] or '') then
+        -- return the left side, the operator, and the right side separately
         return table.concat(infix, ' ', 1, outerOp - 1), 
                infix[outerOp],
                table.concat(infix, ' ', outerOp + 1)
-      else
+      else -- return the whole expression
         return table.concat(infix, ' ')
       end
     end,
   })) 
 
--- casa e captura a mensagem
+-- matches and captures the message
 local MSG = S* m.C(grammar.apply(parser.rules, m.V'Exp'))
 
--- casa e captura um comentário
+-- matches and captures one or more comments, separated at most by one newline
 local COMMENT = m.C((scanner.COMMENT * m.P'\n'^-1) ^ 1)
 
--- para facilitar a captura de padrões opcionais
+-- makes it easier for optional patterns with overarching captures
 local EPSILON = m.P'' / function() return nil end
 
--- PADRÕES ---------------------------------
+-- PATTERNS ---------------------------------
 
--- um padrão que casa com EXP OP EXP ou EXP
+-- matches an expression EXP and packages its captures in a table
 local LINE = EXP / function (exp1, op, exp2)
   return { exp1 = exp1, op = op, exp2 = exp2 }
 end
 
--- um padrão que casa com uma chamada a assert no nosso formato
+-- matches an assert call and packages all relevant information in a table
 local ASSERT = ((COMMENT + EPSILON) *SPACES* m.Cp() * m.P'assert' * OPEN * LINE 
              * ((COMMA * MSG) + EPSILON) * CLOSE * m.Cp()) 
              / function (comment, start, line, msg, finish)
@@ -167,12 +166,12 @@ local ASSERT = ((COMMENT + EPSILON) *SPACES* m.Cp() * m.P'assert' * OPEN * LINE
               }
             end
 
--- um padrão que acha todas as instâncias de ASSERT em um dado programa
+-- matches all ASSERTs in a given input and packages them in a list
 local ALL = m.Ct((ASSERT + 1)^0)
 
--- FUNÇÕES ---------------------------------
+-- FUNCTIONS ---------------------------------
 
--- pega uma captura de ASSERT e produz a chamada new_assert equivalente
+-- takes an ASSERT capture and builds the equivalent ___STIR_assert call
 local function buildNewAssert(info)
   local exp1, op, exp2 = info.exp.exp1, info.exp.op, info.exp.exp2
   local comment, msg, text = info.comment, info.msg, info.text
@@ -183,7 +182,7 @@ local function buildNewAssert(info)
   local str2 = (exp2 == nil) and 'nil' or scanner.text2string(exp2)
   local com = (comment == nil) and 'nil' or scanner.text2string(comment)
   local textStr = scanner.text2string(text)
-  newassert = newassert..'___STIR_assert('..exp1
+  return newassert..'___STIR_assert('..exp1
     ..', '..(op and '"'..op..'"' or 'nil')
     ..', '..(exp2 or 'nil')
     ..', '..(msg or 'nil')
@@ -192,19 +191,16 @@ local function buildNewAssert(info)
     ..', '..com
     ..', '..textStr
     ..')'
-  
-  --print(newassert)
-  return newassert
 end
 
--- substitui a substring de str de i a j pela new_str
+-- replaces str's substring from i to j with new_str
 local function sub(str, new_str, i, j)
   i, j = i or 1, j or #str
   
   return str:sub(1, i - 1)..new_str..str:sub(j)
 end
 
--- substitui todos os asserts em input pelos new_asserts equivalentes
+-- replaces all asserts in input by their ___STIR_assert counterparts
 function stir(input)
   local asserts = ALL:match(input)
   
@@ -218,30 +214,29 @@ function stir(input)
   return input
 end
 
--- TESTES ----------------------------------
+-- TESTS ----------------------------------
 local args = { ... }
 
 ---[===[
 
-
--- imprimindo o teste abaixo
+-- printing the test below
 --[=====[
 local input = args[1] or [==[
 local m = require 'lpeg'
 
 local chunk = assert(loadstring('file.luac'), 'The chunk was not loaded!')
 
---[=[ testando assert
-será que funciona?
-mesmo com --[[ e --]====] no meio?
-e com espaços entre a chamada de assert e o comentário de contexto?
+--[=[ testing assert
+does it work?
+even with --[[ and --]====] in the middle?
+and with spaces between the assert call and the contextual comment?
 --]=]
 
 
 assert  (  exp ~= -8, 
       'slkklajs')
 
--- aqui não captura o comentário, não é mesmo?
+-- this comment isn't captured
 local c = assert((asjksaklj == alklaksj) + a and 4)
 ]==]
 --]=====]
@@ -251,7 +246,7 @@ local input = [[
 -- displayed line
 -- will be the comment in the middle
 assert(
-x -- this should no be displayed
+x -- this should not be displayed
 ==
 nil
 )
@@ -280,28 +275,4 @@ local output = stir(input)
 print('input', '\n'..input)
 print('\noutput', '\n'..output)
 --print(list2string { ALL:match(input) })
---]]
-
---[[
--- Essa função fica no shake.lua
--- out é definido fora da função
-local function toOutput(str)
-  out = out or {} -- se ele não tinha valor, agora tem
- 
-  local lines = util.split(str, '\n')
- 
-  for _, v in ipairs(lines) do
-    out[#out + 1] = v
-  end
-end
-
--- Essa função fica no util.lua, pois usa LPeg
--- Retorna a lista de substrings str separadas por sep.
-function split(str, sep)
-  sep = m.P(sep)
-  local elem = m.C((1 - sep)^0)
-  local p = m.Ct(elem * (sep * elem)^0)
- 
-  return p:match(s)
-end
 --]]
