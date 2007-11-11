@@ -190,4 +190,4 @@ local function init()
     return true
 end
 
-return true, init
+return init()

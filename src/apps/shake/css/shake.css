@@ -1,0 +1,18 @@
+/* Shake Stylesheet */
+/* Copyright 2007 Kepler Project */
+/* $Id: shake.css,v 1.57 2007/10/05 02:03:23 carregal Exp $ */
+
+table.shake {
+    padding: 1em;
+}
+
+table.shake th {
+	text-align:left;
+	background-color: #E7E7E7;
+}
+table.shake thead th {text-align:center}
+table.shake td {text-align:center}
+table.shake td.passed {}
+table.shake td.failed {}
+table.shake td.noerror {}
+table.shake td.error {background-color:#FFA07A}
