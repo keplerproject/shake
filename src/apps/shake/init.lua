@@ -1,8 +1,12 @@
 -- This is an example of a Shake runner that uses CGILua to offer a drill down of the test results
 require"shake"
 
+
 local function init()
     local SHAKE_TESTS = KEPLER_CONF.."/tests"
+    -- get the optional configuration
+    cgilua.doif("shake_conf.lua")
+    local SHAKE_VIRTUAL_DIR = SHAKE_VIRTUAL_DIR or "/"
 
     local suite, _ = cgilua.splitfirst(cgilua.script_vpath)
 
@@ -177,13 +181,15 @@ local function init()
             lfs.chdir("..")
         end
         lfs.chdir(curr_dir)
-        cgilua.handlelp("shake.lp", {SHAKE_TESTS = SHAKE_TESTS, ListSuites = ListSuites, ReportSuites = ReportSuites(run),
+        cgilua.handlelp("shake.lp", {SHAKE_TESTS = SHAKE_TESTS, SHAKE_VIRTUAL_DIR = SHAKE_VIRTUAL_DIR,
+                                    ListSuites = ListSuites, ReportSuites = ReportSuites(run),
                                     ShakeSummary = ShakeSummary, cgilua = cgilua})
     else
         lfs.chdir(SHAKE_TESTS.."/"..suite)
         run:test("test.lua", suite)
         lfs.chdir(curr_dir)
-        cgilua.handlelp("shake_suite.lp", {SHAKE_TESTS = SHAKE_TESTS, suite = suite, ListSuites = ListSuites,
+        cgilua.handlelp("shake_suite.lp", {SHAKE_TESTS = SHAKE_TESTS, SHAKE_VIRTUAL_DIR = SHAKE_VIRTUAL_DIR,
+                                    suite = suite, ListSuites = ListSuites,
                                     ReportSuite = ReportSuite(run), SuiteSummary = SuiteSummary(run, suite),
                                     ShakeSummary = ShakeSummary, cgilua = cgilua})
     end
