@@ -1,0 +1,43 @@
+/* Shake Stylesheet */
+/* Copyright 2007 Kepler Project */
+/* $Id: shake.css,v 1.2 2007/10/29 20:19:05 carregal Exp $ */
+
+div.shakecontext {
+	background-color: rgb(245, 245, 245);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-top-color: silver;
+    border-right-color: silver;
+    border-bottom-color: silver;
+    border-left-color: silver;
+    padding: 1em;
+    margin-left: 1em;
+    margin-right: 1em;
+	margin-top: 3em;
+	margin-bottom: 1em;	
+    font-family: "Andale Mono", monospace; 
+    font-size: smaller;
+}
+
+table.shake {
+    padding: 1em;
+	margin-top: 2em;	
+	margin-bottom: 2em;	
+}
+
+table.shake th {
+	text-align:left;
+	background-color: #E7E7E7;
+}
+table.shake thead th {text-align:center}
+table.shake td {text-align:center}
+table.shake td.passed {}
+table.shake td.failed {background-color:#F0E68C}
+table.shake td.noerror {}
+table.shake td.error {background-color:#FFA07A}

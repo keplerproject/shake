@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>Shake Tests</title>
-    <link rel="stylesheet" href="<%= SHAKE_VIRTUAL_DIR %>css/doc.css" type="text/css"/>
-    <link rel="stylesheet" href="<%= SHAKE_VIRTUAL_DIR %>css/shake.css" type="text/css"/>
+    <link rel="stylesheet" href="<%= cgilua.mkurlpath("css/doc.css") %>" type="text/css"/>
+    <link rel="stylesheet" href="<%= cgilua.mkurlpath("css/shake.css") %>" type="text/css"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 
@@ -13,11 +13,11 @@
 <div id="container">
 
 <div id="product">
-	<div id="product_logo"><a href="http://www.keplerproject.org">
-		<img src="<%= SHAKE_VIRTUAL_DIR %>img/keplerproject.gif" alt="Kepler Project logo" /></a>
+	<div id="product_logo"><a href="http://shake.luaforge.net">
+		<img src="<%= cgilua.mkurlpath("img/shake.gif") %>" alt="Shake Logo" /></a>
     </div>
 	<div id="product_name"><big><strong></strong></big></div>
-	<div id="product_description">Kepler Shake Tests</div>
+	<div id="product_description">Shake Tests</div>
 </div> <!-- id="product" -->
 
 <div id="main">
@@ -26,9 +26,9 @@
 
 <h1>Shake</h1>
 	<ul>
-        <li><strong><a href="<%= cgilua.mkurlpath("shake") %>">All Suites</a></strong>
+        <li><strong><a href="<%= cgilua.mkurlpath("all") %>">All Modules</a></strong>
         <ul>
-            <% ListSuites() %>
+            <% ListModules() %>
         </ul>
         </li>
 	</ul>
@@ -38,7 +38,7 @@
 
 <h1>Shake Summary</h1>
 
-<p>Here you have the number of tests, failures and errors for every test suite in <%= SHAKE_TESTS %></p>
+<p>Here you have the number of tests, failures and errors for every test module in <%= SHAKE_TESTS %></p>
 
 <table class="shake">
     <thead>
@@ -49,7 +49,7 @@
             <th scope="col"><strong>Errors</strong></th>
         </tr>
     </thead>
-    <% ReportSuites() %>
+    <% ReportModules() %>
 </table>
 
 <% ShakeSummary() %>
@@ -67,7 +67,7 @@
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a></p>
-	<p><small>$Id: shake.lp,v 1.3 2007/11/12 17:23:01 carregal Exp $</small></p>
+	<p><small>$Id: shake.lp,v 1.4 2007/11/16 16:26:10 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
