@@ -1,12 +1,13 @@
-# $Id: Makefile.win,v 1.2 2007/10/25 20:53:37 carregal Exp $
+# $Id: Makefile.win,v 1.3 2007/11/16 16:50:21 carregal Exp $
 
 include config.win
 
 SHAKE_BINS = src\bin\shake src\bin\shake.bat
 ROOT_LUAS = src\shake\shake.lua 
 SHAKE_LUAS= src\shake\grammar.lua src\shake\parser.lua src\shake\scanner.lua src\shake\stir.lua src\shake\util.lua
-WEBS= web\shake.lp
-CSS= web\css\shake.css
+APP_FILES = src\apps\shake\helper.lua src\apps\shake\init.lua src\apps\shake\shake_suite.lp src\apps\shake\shake.lp
+APP_CSS = src\apps\shake\css\doc.css src\apps\shake\css\shake.css
+APP_IMG = src\apps\shake\img\shake.gif 
 
 install:
 	IF NOT EXIST $(LUA_DIR) mkdir $(LUA_DIR)
@@ -14,3 +15,12 @@ install:
 	FOR %i IN ($(SHAKE_LUAS)) DO copy %i $(LUA_DIR)\shake 
 	copy $(ROOT_LUAS) $(LUA_DIR)\ 
     FOR %i IN ($(SHAKE_BINS)) DO copy %i $(SYS_BINDIR)\ 
+    
+install_app:
+	IF NOT EXIST $(CGILUA_APPSDIR) mkdir $(CGILUA_APPSDIR)
+	IF NOT EXIST $(CGILUA_APPSDIR)\shake mkdir $(CGILUA_APPSDIR)\shake
+	IF NOT EXIST $(CGILUA_APPSDIR)\shake\css mkdir $(CGILUA_APPSDIR)\shake\css
+	IF NOT EXIST $(CGILUA_APPSDIR)\shake\img mkdir $(CGILUA_APPSDIR)\shake\img
+	FOR %i IN ($(APP_FILES)) DO copy %i $(CGILUA_APPSDIR)\shake 
+	FOR %i IN ($(APP_CSS)) DO copy %i $(CGILUA_APPSDIR)\shake\css
+	FOR %i IN ($(APP_IMG)) DO copy %i $(CGILUA_APPSDIR)\shake\img

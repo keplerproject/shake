@@ -1,15 +1,22 @@
-# $Id: config,v 1.1 2007/10/25 18:48:11 carregal Exp $
+# $Id: config,v 1.2 2007/11/16 16:50:21 carregal Exp $
+
+# Default installation prefix
+PREFIX=/usr/local
 
 # System's libraries directory (where binary libraries are installed)
-LUA_LIBDIR= /usr/local/lib/lua/5.1
+LUA_LIBDIR= $(PREFIX)/lib/lua/5.1
 
 # System's lua directory (where Lua libraries are installed)
-LUA_DIR= /usr/local/share/lua/5.1
+LUA_DIR= $(PREFIX)/share/lua/5.1
 
 # System's executables directory (where binary or script executables are installed)
-SYS_BINDIR= /usr/local/bin
+SYS_BINDIR= $(PREFIX)/bin
 
 # Complete path to Lua command line interpreter
-LUA_INTERPRETER= /usr/local/bin/lua
+LUA_INTERPRETER= $(PREFIX)/bin/lua5.1
 
-VERSION= 1.0
+# Default Kepler installation prefix
+KEPLER_PREFIX=
+
+# CGILua Apps directory
+CGILUA_APPSDIR = $(KEPLER_PREFIX)/etc/kepler/1.1/apps/cgilua
