@@ -16,7 +16,7 @@ cgilua.doif("helper.lua")
 local SHAKE_TESTS = SHAKE_TESTS or KEPLER_CONF.."/tests"
 
 local path_info = cgilua.script_vpath
-local cmd, rest = cgilua.splitfirst(path_info)
+local cmd, rest = cgilua.splitonfirst(path_info)
 
 cmd = cmd or "all"
 
@@ -48,7 +48,7 @@ if cmd == "all" then
 	cgilua.handlelp("shake.lp", env)
 elseif cmd == "module" then
 	-- Shakes a single module
-	local module_name = cgilua.splitfirst(rest)
+	local module_name = cgilua.splitonfirst(rest)
 	lfs.chdir(SHAKE_TESTS.."/"..module_name)
 	run:test("test.lua", module_name)
 	lfs.chdir(curr_dir)
