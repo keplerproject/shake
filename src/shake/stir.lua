@@ -13,9 +13,10 @@ local type = type
 
 -- imported modules
 local m       = require 'lpeg'
-local scanner = require 'shake.scanner'
-local parser  = require 'shake.parser'
-local grammar = require 'shake.grammar'
+
+local scanner = require 'leg.scanner'
+local parser  = require 'leg.parser'
+local grammar = require 'leg.grammar'
 
 -- module declaration
 module 'shake'
@@ -23,7 +24,7 @@ module 'shake'
 -- HELPER VALUES AND FUNCTIONS ------------
 
 -- matches one or more "ignorable" strings (spaces or comments)
-local S = scanner.IGNORE
+local S = scanner.IGNORED
 
 -- matches all space characters
 local SPACES = scanner.SPACE^0
@@ -47,6 +48,23 @@ local function list2string(t, level)
     end
     
     return str..'\n'..indent..'}'
+  end
+end
+
+-- removes the final newline character from comments
+local function removeNewline(comment)
+  if type(comment) == 'string' then -- it's a single comment
+    if comment:sub(-1, -1) == '\n' then
+      return comment:sub(1, -2)
+    else
+      return comment
+    end
+  elseif type(comment) == 'table' then -- it's a list of comments
+    for i, v in ipairs(comment) do
+      comment[i] = removeNewline(v) 
+    end
+    
+    return comment
   end
 end
 
@@ -159,7 +177,7 @@ local ASSERT = ((COMMENT + EPSILON) *SPACES* m.Cp() * m.P'assert' * OPEN * LINE
              / function (comment, start, line, msg, finish)
               return {
                 start = start,
-                comment = (comment ~= nil) and util.removeNewline(comment) or nil,
+                comment = (comment ~= nil) and removeNewline(comment) or nil,
                 exp = line,
                 msg = msg,
                 finish = finish,

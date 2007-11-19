@@ -1,4 +1,4 @@
-#!/usr/bin/env lua5.1
+#!/usr/bin/env lua
 
 -------------------------------------------------------------------------------
 -- Command line runner for Shake
@@ -6,7 +6,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.10 2007/11/16 16:50:21 carregal Exp $
+-- $Id: shake,v 1.11 2007/11/19 20:25:10 hanjos Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
