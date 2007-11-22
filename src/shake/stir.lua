@@ -190,7 +190,7 @@ local ALL = m.Ct((ASSERT + 1)^0)
 -- FUNCTIONS ---------------------------------
 
 -- takes an ASSERT capture and builds the equivalent ___STIR_assert call
-local function buildNewAssert(info)
+local function buildNewAssert(info, assertName)
   local exp1, op, exp2 = info.exp.exp1, info.exp.op, info.exp.exp2
   local comment, msg, text = info.comment, info.msg, info.text
   
@@ -200,7 +200,7 @@ local function buildNewAssert(info)
   local str2 = (exp2 == nil) and 'nil' or scanner.text2string(exp2)
   local com = (comment == nil) and 'nil' or scanner.text2string(comment)
   local textStr = scanner.text2string(text)
-  return newassert..'___STIR_assert('..exp1
+  return newassert..assertName..'('..exp1
     ..', '..(op and '"'..op..'"' or 'nil')
     ..', '..(exp2 or 'nil')
     ..', '..(msg or 'nil')
@@ -219,14 +219,15 @@ local function sub(str, new_str, i, j)
 end
 
 -- replaces all asserts in input by their ___STIR_assert counterparts
-function stir(input)
+function stir(input, assertName)
+  assertName = assertName or '___STIR_assert'
   local asserts = ALL:match(input)
   
   for i = #asserts, 1, -1 do
     local v = asserts[i]
     
     v.text = input:sub(v.start, v.finish)
-    input = sub(input, buildNewAssert(v), v.start, v.finish)
+    input = sub(input, buildNewAssert(v, assertName), v.start, v.finish)
   end
   
   return input
