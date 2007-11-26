@@ -189,7 +189,7 @@ local ALL = m.Ct((ASSERT + 1)^0)
 
 -- FUNCTIONS ---------------------------------
 
--- takes an ASSERT capture and builds the equivalent ___STIR_assert call
+-- takes an ASSERT capture and builds the equivalent [assertName] call
 local function buildNewAssert(info, assertName)
   local exp1, op, exp2 = info.exp.exp1, info.exp.op, info.exp.exp2
   local comment, msg, text = info.comment, info.msg, info.text
@@ -232,66 +232,3 @@ function stir(input, assertName)
   
   return input
 end
-
--- TESTS ----------------------------------
-local args = { ... }
-
----[===[
-
--- printing the test below
---[=====[
-local input = args[1] or [==[
-local m = require 'lpeg'
-
-local chunk = assert(loadstring('file.luac'), 'The chunk was not loaded!')
-
---[=[ testing assert
-does it work?
-even with --[[ and --]====] in the middle?
-and with spaces between the assert call and the contextual comment?
---]=]
-
-
-assert  (  exp ~= -8, 
-      'slkklajs')
-
--- this comment isn't captured
-local c = assert((asjksaklj == alklaksj) + a and 4)
-]==]
---]=====]
---[=[
-local input = [[
--- this is a multiline assert. If stir does not handle it right, the
--- displayed line
--- will be the comment in the middle
-assert(
-x -- this should not be displayed
-==
-nil
-)
-assert(
-x
--- 1
-==
--- 2
-5
--- 3
-)
--- 4
-x = "If this line shows up, stir lost the line count"
-]]
---]=]
---[=[
-local input = [[
-if type(x) ~= "table" then assert(x == y) end
-assert(n == # "t" and table.concat(t) == "alo")
-]]
---]=]
---[[
-local output = stir(input)
-
-
-print('input', '\n'..input)
-print('\noutput', '\n'..output)
---print(list2string { ALL:match(input) })
---]]
