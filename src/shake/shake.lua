@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.7 2007/10/29 20:17:15 carregal Exp $
+-- $Id: shake.lua,v 1.8 2007/11/30 22:42:21 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -12,8 +12,8 @@ local lfs = require "lfs"
 local table = require "table"
 local string = require "string"
 
-local _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
-      _G, error, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
+local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
+      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
 
 require "shake.stir"
 
@@ -34,6 +34,35 @@ local traceback = debug.traceback
 module(...)
 
 ----------- local functions ------------
+
+-- Version of loadstring that stirs the file before compiling it
+local function _loadstring(s, filename)
+    s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of an eventual one with a #! at the start\n")
+    s = stir(s)
+    return loadstring(s, filename)    
+end
+
+-- Version of loadfile that stirs the file before compiling it
+local function _loadfile(filename)
+    local f
+    local file = io.open(filename)
+    if not file then
+        return
+    else
+        local s = file:read'*a'
+        f, errmsg = _loadstring(s, filename)
+    end
+    return f, errmsg
+end
+
+-- Version of dofile that stirs the file before executing it
+local function _dofile(filename)
+    local results = {pcall(_loadfile(filename))}
+    if results[1] then
+        table.remove(results, 1)
+    end
+    return unpack(results)
+end
 
 -- Returns a new suite
 local function _newsuite(filename, title, errmsg)
@@ -99,17 +128,7 @@ end
 -- Test results are added to the results table
 -------------------------------------------------------------------------------
 local function _test(self, filename, title)
-    local f
-    local file = io.open(filename)
-    if not file then
-        return
-    else
-        local s = file:read'*a'
-        s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of the #! one\n")
-        s = stir(s)
-        
-        f, errmsg = loadstring(s, filename)
-    end
+    f, errmsg = _loadfile(filename)
     local results = self.results
     title = title or ""
     if not f then
@@ -122,6 +141,12 @@ local function _test(self, filename, title)
         local _print = _G.print
         local _write = _G.io.write
         local ___STIR_assert = _G.___STIR_assert
+        local lf = loadfile
+        local df = dofile
+
+        _G.loadfile = _loadfile
+        _G.dofile = _dofile
+        
         local suite = _newsuite(filename, title)
 
         local context = _newcontext("")
@@ -155,7 +180,10 @@ local function _test(self, filename, title)
         results.passed = results.passed + suite.passed
         results.failed = results.failed + suite.failed
         results.suites[#results.suites + 1] = suite
-        
+
+        -- restores the environment
+        _G.loadfile = lf
+        _G.dofile = df        
         _G.print = _print
         _G.io.write = _write
         _G.___STIR_assert = ___STIR_assert
@@ -218,11 +246,13 @@ end
 
 
 
----------- public functions --------------
+----------                    Public functions                   --------------
 
 
 -------------------------------------------------------------------------------
--- Returns a new runner
+-- Returns a new runner with the functions
+-- test(filename)
+-- summary()
 -------------------------------------------------------------------------------
 function runner()
     local runner = {results = {passed = 0, failed = 0, errors = 0, suites = {} } }
@@ -231,7 +261,7 @@ function runner()
 end
 
 -------------------------------------------------------------------------------
--- Checks if an expression is a terminal value
+-- Checks if an expression string represents a terminal value
 -------------------------------------------------------------------------------
 function isTerminal(exp, val)
     if not exp then return true end
