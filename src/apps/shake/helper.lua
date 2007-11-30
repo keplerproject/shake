@@ -1,6 +1,38 @@
 -- Helper file for the CGILua based Shake runner
 --
 
+-- Auxiliary formating function for tables (shows only the first level)
+local function _expandtable(t)
+    local s = "{"
+    for i,v in pairs (t) do
+        s = s.."<br />\n"
+        if type(v) == "table" then
+            local vv = "{<br />\n"
+            for a,b in pairs(v) do
+                vv = string.format ("%s  %s = %s,<br />\n", vv, a, tostring(b))
+            end
+            v = vv.." },"
+            s = s..string.format (" %s = %s", i, tostring(v))
+        else
+            s = s..string.format (" %s = %s,", i, tostring(v))
+        end
+    end
+    if next(t) then
+        s = s.."<br />\n"
+    end
+    s = s.."}<br />\n"
+    return s
+end
+
+-- Auxiliary formating function
+local function _tostring(obj)
+    if type(obj) == "table" then
+        return _expandtable(obj)
+    else
+        return tostring(obj)
+    end
+end
+
 -- Lists the available test modules using a <li>..</li> format
 function ListModules(modules)
 	return function()
@@ -103,7 +135,7 @@ function ReportModule(run)
                            cgilua.put([[<td class="]]..testclass..[[">]]..linenumber.."</td>")
                            cgilua.put([[<td class="]]..testclass..[[">]]..test.exp1.."</td>")
                            cgilua.put([[<td class="]]..testclass..[[">]]..op..val2.."</td>")
-                           cgilua.put([[<td class="]]..testclass..[[">]]..tostring(test.val1).."</td>")
+                           cgilua.put([[<td class="]]..testclass..[[">]].._tostring(test.val1).."</td>")
                            if not test.passed then
                                cgilua.put([[<td class="]]..testclass..[[">]]..(test.msg or "").."</td>")
                            else
