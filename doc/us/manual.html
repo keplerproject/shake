@@ -31,6 +31,7 @@
 				<li><a href="index.html#overview">Overview</a></li>
 				<li><a href="index.html#status">Status</a></li>
 				<li><a href="index.html#download">Download</a></li>
+				<li><a href="index.html#dependencies">Dependencies</a></li>
 				<li><a href="index.html#history">History</a></li>
 				<li><a href="index.html#credits">Credits</a></li>
 				<li><a href="index.html#contact">Contact us</a></li>
@@ -66,7 +67,7 @@ test progress and to use Lua comments to inform what is being tested to whoever 
 this approach may be too crude for those wanting to test more than one module at a time or to have a more detailed view
 of the results.</p>
 
-<p>Shake assumes that the tests have been implemented for the above scenartio but offers a transparent test engine
+<p>Shake assumes that the tests have been implemented for the above scenario but offers a transparent test engine
 for those wanting the execution of the tests in batch mode or those wanting to get an overview of the various results.
 The Shake engine can inform not only the number of tests, failures and errors found in a group of test scripts, but it
 can infer information about the test context using the output and comments associated with the <code>assert()</code>
@@ -74,7 +75,10 @@ calls.</p>
 
 <p>The main characteristic of Shake is being transparent, which means that the module authors and test writers do not have
 to be aware that tests are going to be run with Shake. As long as the tests call <code>assert()</code> Shake can obtain
-quite a lot of information from the source and run time execution.</p>
+quite a lot of information from the source and run time execution. This is done through the pre-processing of the tests source
+code using <a href="http://leg.luaforge.net/">Leg</a> (and therefore
+<a href="http://www.inf.puc-rio.br/~roberto/lpeg.html">LPeg</a>) to replace every call to <code>assert()</code>
+with one that can extract information about the expressions, values and operators involved in the assertion.</p>
 
 <p>Another common alternative to testing is the one adopted by test frameworks like <a href="http://luaforge.net/projects/lunit/">lunit</a> and
 <a href="http://luaforge.net/projects/luaunit/">luaunit</a>, which offer a quite sophisticated API for those test
@@ -88,7 +92,7 @@ displays nice error messages (provided in the <code>assert()</code> call). Unfor
 expression is true or false and report that as an error in the second case.</p>
 
 <p>This makes the test scripts much simpler, but also means that you have to provide decent error messages for every
-assertion and that once one assertion fails, your test stops running. Another disavantage of a simple <code>assert()</code>
+assertion and that once one assertion fails, your test stops running. Another disvantage of a simple <code>assert()</code>
 call is that it is does not provide much information about what caused the error. For example, in an assertion like:</p>
 
 <pre class="example">
@@ -122,22 +126,31 @@ as an standard module and offers an API for test execution and for accessing the
 <p>The Shake source distribution contains two components. The first one is a Lua module and command line runner,
 the second is a CGILua application runner.</p>
 
-<p>If you are using Unix you can install the command line runner and the Shake module
-using the command below (Where the optional <code>PREFIX</code> parameter assumes
+<p>The easiest way to install the Shake module and command line runner is using
+<a href="http://www.luarocks.org">LuaRocks</a>:</p>
+
+<pre class="example">
+luarocks install shake
+</pre>
+
+<p>If you prefer to install Shake manually and you are using Unix then you can install the command line runner
+and the Shake module using the command below (where the optional <code>PREFIX</code> parameter assumes
 <code>/usr/local</code> as default):</p>
 
 <pre class="example">
 make <em>PREFIX=prefix_path</em> install
 </pre>
 
-<p>After you have the Shake engine installed you can optionally install the CGILua application using a similar command:</p>
+<p>After you have the Shake engine installed you can optionally install the CGILua application using a similar command
+(note that the CGILua application cannot be installed by using LuaRocks):</p>
 
 <pre class="example">
 make <em>KEPLER_PREFIX=prefix_path</em> install_app
 </pre>
 
-<p>If you are using Kepler in Windows you would have to copy the source files to your <em>KEPLER_BIN</em>,
-<em>KEPLER_LUA</em> (and <em>CGILUA_APPS</em> if you want to use the Shake CGILua application) directories as the example
+<p>Finally, if you are using Kepler in Windows you would have to copy the Shake source files to your
+<em>KEPLER_BIN</em>, <em>KEPLER_LUA</em>
+(and <em>CGILUA_APPS</em> if you want to use the Shake CGILua application) directories as the example
 below shows:</p>
 
 <pre class="example">
@@ -254,13 +267,28 @@ the succesfull ones</p>
 
 <h2><a name="reference"></a>Reference</h2>
 
-<p>For those interested in more control over the runner and the report, Shake offers the following functions:</p>
+<p>For those interested in more control over the runner and the report, Shake offers the following functions
+(check the <a href="examples.html">examples</a> for more information):</p>
 
 <dl class="reference">
-    <dt><strong><code>runner()</code></strong></dt>
-    <dd>
-    Returns a Shake runner that offers the functions <code>test(filename)</code> and <code>summary()</code>
-    </dd>
+	<dt><strong><code>shake.runner()</code></strong></dt>
+	<dd>
+	Returns a Shake runner that offers the functions:
+	<dl>
+	    <dt><strong><code>runner.test(filename)</code></strong></dt>
+	    <dd>
+	    Executes a test suite and stores the results in the <code>runner.results</code> table.
+	    </dd>
+	    <dt><strong><code>runner.summary()</code></strong></dt>
+	    <dd>
+	    Outputs a summary of the results from the <code>runner.results</code> table.
+	    </dd>
+	</dl>
+	</dd>
+	<dt><strong><code>shake.isterminal(expression)</code></strong></dt>
+	<dd>
+	Returns a boolean value indicating if the expression refers to a terminal symbol.
+	</dd>
 </dl>
 
 </div> <!-- id="content" -->
@@ -269,7 +297,7 @@ the succesfull ones</p>
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: manual.html,v 1.2 2007/12/07 21:42:04 carregal Exp $</small></p>
+	<p><small>$Id: manual.html,v 1.3 2007/12/13 21:49:11 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

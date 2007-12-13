@@ -31,6 +31,7 @@
 				<li><a href="index.html#overview">Overview</a></li>
 				<li><a href="index.html#status">Status</a></li>
 				<li><a href="index.html#download">Download</a></li>
+				<li><a href="index.html#dependencies">Dependencies</a></li>
 				<li><a href="index.html#history">History</a></li>
 				<li><a href="index.html#credits">Credits</a></li>
 				<li><a href="index.html#contact">Contact us</a></li>
@@ -58,7 +59,80 @@
 
 <h2><a name="example"></a>Examples</h2>
 
-<h3>Running Shake</h3>
+<p>Here we show how to use the Shake API to implement runners. Note that if you just want to
+execute tests, the built in runners (command line and CGILua app) may be enough. On the other hand,
+if you need to show more detailed information about the tests results or if you want to use Shake as part
+of your application runtime, then you will need to use the Shake API.</p>
+
+<h3>A simple runner</h3>
+
+<p>The minimal Shake runner would be like:</p>
+
+<pre class="example">
+require "shake"
+local run = shake.runner()
+run:test("somefile.lua")
+print (run:summary())
+</pre>
+
+<p>This would be basically equivalent to the command line Shake runner, and if you want to report more
+details than the default summary does, you will need to drill down the results using something like:</p>
+
+<pre class="example">
+function ReportModules(run)
+   local results = run.results
+   for cs, suite in ipairs(results.suites) do
+       -- displays information about the suite.title
+       if suite.error then
+	-- displays information about the suite error
+       elseif suite.failed > 0 then
+	-- displays information about the suite.failed results
+       else
+	-- displays information about the suite.passed and suite.failed results
+       end
+   end
+end
+</pre>
+
+<p>For even more details, you may want to inspect each test result and decide what to show:</p>
+
+<pre class="example">
+function ReportModule(run)
+  local results = run.results
+  for _, suite in ipairs(results.suites) do
+    if suite.error == -1 then
+      -- displays information about the error
+    else
+      for _, context in ipairs(suite.contexts) do
+        if next(context.tests) then
+          if context.output[1] ~= "" or context.comments then
+            -- displays information about the context
+            for _, output in ipairs(context.output) do
+              if output and output ~= "" then
+                -- using context.output
+              end
+            end
+            if context.comments and context.comments ~= "" then
+              --  or context.comments
+            end
+          end
+          for _, test in ipairs (context.tests) do
+	  local linenumber = test.linenumber or "???"
+	  local op = test.op
+	   local val2 = tostring(test.val2)
+	  -- when there is no comparision operator, assume that this is an assert(x) case
+	  if not op then
+	    val2 = "True value" -- just to diferentiate from the Lua "true"
+	  end
+	  if not op or op == "==" then
+	    op = ""
+	  end
+	  -- displays information about the test result using
+	  -- linenumber, test.exp1, op, val2, test.val1 and test.msg
+	end
+       end
+    end
+end
 
 </div> <!-- id="content" -->
 
@@ -66,7 +140,7 @@
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: examples.html,v 1.1 2007/11/16 21:32:28 carregal Exp $</small></p>
+	<p><small>$Id: examples.html,v 1.2 2007/12/13 21:49:11 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
