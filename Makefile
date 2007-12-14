@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2007/11/19 20:25:10 hanjos Exp $
+# $Id: Makefile,v 1.5 2007/12/14 18:18:19 carregal Exp $
 
 CONFIG= ./config
 
@@ -10,7 +10,10 @@ APP_FILES = src/apps/shake/helper.lua src/apps/shake/init.lua src/apps/shake/sha
 APP_CSS = src/apps/shake/css/doc.css src/apps/shake/css/shake.css
 APP_IMG = src/apps/shake/img/shake.gif  
 
+all:
+
 install:
+	chmod +x $(SHAKE_BIN)
 	mkdir -p $(LUA_DIR)/shake
 	cp $(ROOT_LUAS) $(LUA_DIR)
 	cp $(SHAKE_LUAS) $(LUA_DIR)/shake
