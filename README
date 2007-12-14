@@ -1,0 +1,37 @@
+Shake
+(http://shake.luaforge.net/)
+
+Shake is a simple and transparent test engine for Lua that assumes that tests only
+use standard assert and print calls. If you are looking for a xUnit style framework,
+check lunit and luaunit instead.
+
+Shake is distributed as a Lua module, a command line runner and a CGILua application.
+
+Shake is free software and uses the same license as Lua 5.1.
+
+Current version is 1.0. It was developed for Lua 5.1.
+
+Download
+
+Shake source can be downloaded from its Lua Forge page:
+http://luaforge.net/frs/?group_id=310
+
+Dependencies
+
+Shake depends on two modules:
+
+    * LuaFileSystem 1.3.0
+    * Leg 0.1.2
+
+History
+
+Version 1.0 [14/Dec/2007]
+        * First public release
+        * Command line and CGILua application versions
+
+
+Installing
+
+If you are using LuaRocks just install it as any other Rock, if you are using Unix
+use make install. For details on the CGILua application installation please check
+the Shake documentation.
