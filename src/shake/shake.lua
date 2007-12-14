@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.9 2007/12/14 19:08:53 carregal Exp $
+-- $Id: shake.lua,v 1.10 2007/12/14 19:14:41 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -12,8 +12,8 @@ local lfs = require "lfs"
 local table = require "table"
 local string = require "string"
 
-local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
-      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
+local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv, loadfile, dofile =
+      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv, loadfile, dofile
 
 require "shake.stir"
 
