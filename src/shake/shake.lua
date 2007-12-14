@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.8 2007/11/30 22:42:21 carregal Exp $
+-- $Id: shake.lua,v 1.9 2007/12/14 19:08:53 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -32,6 +32,10 @@ local getinfo = debug.getinfo
 local traceback = debug.traceback
 
 module(...)
+
+_COPYRIGHT = "Copyright (C) 2007 Kepler Project"
+_DESCRIPTION = "Shake is a simple and transparent test engine for Lua that assumes that tests only use standard assert and print calls."
+_VERSION = "Shake 1.0"
 
 ----------- local functions ------------
 
