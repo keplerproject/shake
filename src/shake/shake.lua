@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.11 2007/12/21 15:08:51 carregal Exp $
+-- $Id: shake.lua,v 1.12 2007/12/21 18:23:09 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -35,7 +35,7 @@ module(...)
 
 _COPYRIGHT = "Copyright (C) 2007 Kepler Project"
 _DESCRIPTION = "Shake is a simple and transparent test engine for Lua that assumes that tests only use standard assert and print calls."
-_VERSION = "Shake 1.0"
+_VERSION = "Shake 1.0.1"
 
 ----------- local functions ------------
 
@@ -180,7 +180,13 @@ local function _test(self, filename, title)
                 context = _newcontext(...)
                 suite.contexts[#suite.contexts + 1] = context
             else
-                context.output[#context.output + 1] = table.concat({...})
+		-- converts all parameters to strings
+		local temp = {}
+		for i = 1, _G.select('#',...) do
+			table.insert(temp, _G.tostring(_G.select(i,...)))
+		end
+		-- and concatenates them
+		context.output[#context.output + 1] = table.concat(temp, "\t")
             end
             _G.___STIR_assert = _newassert(suite, context)
         end
