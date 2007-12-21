@@ -6,7 +6,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.13 2007/12/21 15:18:15 carregal Exp $
+-- $Id: shake,v 1.14 2007/12/21 18:07:37 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -18,9 +18,32 @@ local shake_test = "shake_test.lua"
 local user_test = "test.lua"
 local recursive = false
 
-if arg[1] == "-r" then
+-- checks for recursive flag
+if arg[1] == "-r" or arg[1] == "--recursive" then
 	recursive = true
 	table.remove(arg)
+end
+
+-- checks for version flag
+if arg[1] == "-v" or arg[1] == "--version" then
+	print (shake._VERSION)
+	os.exit(0)
+end
+
+-- checks for help flag
+if arg[1] == "-h" or arg[1] == "--help" then
+	print (shake._DESCRIPTION.."\n\n"..[[
+Usage: shake [options] [filename]
+
+Runs a test file called filename (assuming "]]..user_test..[[" by default) in the
+current directory or any of its subdirectories if the -r option is given.
+
+Options:
+	-h, --help	Prints this help message
+	-r, --recursive	Recursively scans subdirectories for "]]..user_test..[[" files and runs them
+	-v, --version	Prints the Shake version
+]])
+	os.exit(0)
 end
 
 local filename = arg[1] or user_test
