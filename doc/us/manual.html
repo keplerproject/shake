@@ -118,8 +118,8 @@ results as a text message and another that displays a much more complete report 
 the results.</p>
 
 <p>For those wanting more control on the test execution and reporting, the Shake module (the engine itself) can be used
-as an standard module and offers an API for test execution and for accessing the results. For more details see the API
-<a href="manual.html#reference">reference</a>.</p>
+as an standard module and offers an API for test execution and for accessing the results. For more details see the 
+<a href="examples.html">examples</a> and the API <a href="manual.html#reference">reference</a>.</p>
 
 <h2><a name="installation"></a>Installation</h2>
 
@@ -173,76 +173,29 @@ below shows:</p>
 
 <h3>Command line runner</h3>
 
-<p>To run Shake in the command line you just need to go to your test directory and execute</p>
+<p>The Shake command line runner is called <code>shake</code> and uses the following syntax:</p>
 
 <pre class="example">
-shake <em>test_script</em>
+shake <em>[options]</em> <em>[filename]</em>
 </pre>
 
-<p>Shake will then look for the test script (assuming by default that it is called <code>test.lua</code>), execute all
-the tests in it and report a summary of the results. If for example you have a module like LuaFileSystem installed and
-you go to its <code>/tests</code> directory and run Shake from there, the output would be:</p>
+<p>This command runs a test file called <em>filename</em> (assuming <code>test.lua</code> by default) in the
+current directory or any of its subdirectories if the <code>-r</code> option is given.</p>
 
-<pre class="example">
-~/workspace/luafilesystem/tests$ shake
-->  test.lua OK!
-_________________
+<p>The command options are:</p>
 
-Tests: 27
-Failures: 0
-Errors: 0
-</pre>
+<dl>
+	<dt><strong>-h</strong>, <strong>--help</strong></dt>
+	<dd>Prints this help message</dd>
+	
+	<dt><strong>-r</strong>, <strong>--recursive</strong></dt>
+	<dd>Recursively scans subdirectories for <code>test.lua</code> files and runs them</dd>
+	
+	<dt><strong>-v</strong>, <strong>--version</strong></dt>
+	<dd>Prints the Shake version</dd>
+</dl>
 
-<p>On the other hand, if you have a test script like the one below that includes two assertions that are supposed to fail
-(lines are numbered):</p>
-
-<pre class="example">
- 1	items = 10
- 2	-- checks the correct case
- 3	assert (items == 10, "this should not fail")
- 4
- 5	items = 20
- 6	-- checks an overflow case
- 7	assert (items == 10, "wrong number of items")
- 8
- 9	print("Verifying the total")
-10	items = 10
-11	total = 30
-12	assert (items == total, "wrong total")
-</pre>
-
-<p>Shake would register the failures but would run the whole test script, reporting at the end:</p>
-
-<pre class="example">
-:~/workspace$ shake
-----------------    test.lua failed!   ----------------
-
--- checks an overflow case
-   #7 assert (items == 10, "wrong number of items")
-   items -> 20
-
-Verifying the total
-   #12 assert (items == total, "wrong total")
-   items -> 10
-   total -> 30
-_________________
-
-Tests: 3
-Failures: 2
-Errors: 0
-
-</pre>
-
-<p>Note how much more informative this is when compared to the default output of running the test script with Lua:</p>
-
-<pre class="example">
-:~/workspace$ lua5.1 test.lua
-lua5.1: test.lua:7: wrong number of items
-stack traceback:
-        [C]: in function 'assert'
-        test.lua:7: in main chunk
-        [C]: ?
-</pre>
+<p>Check the <a href="examples.html">examples</a> page for an output of a Shake run.</p>
 
 <h3>CGILua application runner</h3>
 
@@ -297,7 +250,7 @@ the succesfull ones</p>
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: manual.html,v 1.4 2007/12/14 19:08:32 carregal Exp $</small></p>
+	<p><small>$Id: manual.html,v 1.5 2007/12/21 19:00:38 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

@@ -9,7 +9,7 @@ Shake is distributed as a Lua module, a command line runner and a CGILua applica
 
 Shake is free software and uses the same license as Lua 5.1.
 
-Current version is 1.0. It was developed for Lua 5.1.
+Current version is 1.0.1. It was developed for Lua 5.1.
 
 Download
 
@@ -24,6 +24,14 @@ Shake depends on two modules:
     * Leg 0.1.2
 
 History
+
+Version 1.0.1 [21/Dec/2007]
+        * Added support for dostring and loadstring (patch by Fábio Mascarenhas)
+        * Shake was not considering the filename parameter (bug found by Leo Razoumov)
+        * Improves the output of shake -r
+        * Adding -v flag for version and -h flag for help (patch by Enrico Tassi)
+        * Fixes a bug in the print implementation when the parameters where not strings (patch by Jean-Claude Wippler)
+
 
 Version 1.0 [14/Dec/2007]
         * First public release

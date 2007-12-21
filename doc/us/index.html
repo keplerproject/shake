@@ -70,7 +70,7 @@ check <a href="http://luaforge.net/projects/lunit/">lunit</a> and
 
 <h2><a name="status"></a>Status</h2>
 
-<p>Current version is 1.0. It was developed for Lua 5.1.</p>
+<p>Current version is 1.0.1. It was developed for Lua 5.1.</p>
 
 <h2><a name="download"></a>Download</h2>
 
@@ -88,13 +88,27 @@ check <a href="http://luaforge.net/projects/lunit/">lunit</a> and
 <h2><a name="history"></a>History</h2>
 
 <dl class="history">
-    <dt><strong>Version 1.0</strong> [14/Dec/2007]</dt>
-    <dd>
-    <ul>
-        <li>First public release</li>
-        <li>Command line and CGILua application versions</li>
-    </ul>
-    </dd>
+	<dt><strong>Version 1.0.1</strong> [21/Dec/2007]</dt>
+	<dd>
+	<ul>
+		<li>Added support for <code>dostring</code> and <code>loadstring</code>
+		(patch by F&aacute;bio Mascarenhas)</li>
+		<li>Shake was not considering the filename parameter (bug found by Leo Razoumov)</li>
+		<li>Improves the output of <code>shake -r</code></li>
+		<li>Adding <code>-v</code> flag for version and <code>-h</code> flag for help
+		(patch by Enrico Tassi)</li>
+		<li>Fixes a bug in the <code>print</code> implementation when the parameters
+		where not strings (patch by Jean-Claude Wippler)</li>
+	</ul>
+	</dd>
+	
+	<dt><strong>Version 1.0</strong> [14/Dec/2007]</dt>
+	<dd>
+	<ul>
+		<li>First public release</li>
+		<li>Command line and CGILua application versions</li>
+	</ul>
+	</dd>
 </dl>
 
 <h2><a name="credits"></a>Credits</h2>
@@ -117,7 +131,7 @@ Comments are welcome!</p>
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: index.html,v 1.7 2007/12/14 19:19:39 carregal Exp $</small></p>
+	<p><small>$Id: index.html,v 1.8 2007/12/21 19:00:38 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

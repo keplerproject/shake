@@ -59,12 +59,78 @@
 
 <h2><a name="example"></a>Examples</h2>
 
+<h3>Running Shake in the command line</h3>
+
+<p>Assuming you have a module like LuaFileSystem installed and
+you go to its <code>/tests</code> directory and run Shake from there, the output would be:</p>
+
+<pre class="example">
+~/workspace/luafilesystem/tests$ shake
+->  test.lua OK!
+_________________
+
+Tests: 27
+Failures: 0
+Errors: 0
+</pre>
+
+<p>On the other hand, if you have a test script like the one below that includes two assertions that are supposed to fail
+(lines are numbered):</p>
+
+<pre class="example">
+ 1	items = 10
+ 2	-- checks the correct case
+ 3	assert (items == 10, "this should not fail")
+ 4
+ 5	items = 20
+ 6	-- checks an overflow case
+ 7	assert (items == 10, "wrong number of items")
+ 8
+ 9	print("Verifying the total")
+10	items = 10
+11	total = 30
+12	assert (items == total, "wrong total")
+</pre>
+
+<p>Shake would register the failures but would run the whole test script, reporting at the end:</p>
+
+<pre class="example">
+:~/workspace$ shake
+----------------    test.lua failed!   ----------------
+
+-- checks an overflow case
+   #7 assert (items == 10, "wrong number of items")
+   items -> 20
+
+Verifying the total
+   #12 assert (items == total, "wrong total")
+   items -> 10
+   total -> 30
+_________________
+
+Tests: 3
+Failures: 2
+Errors: 0
+
+</pre>
+
+<p>Note how much more informative this is when compared to the default output of running the test script with Lua:</p>
+
+<pre class="example">
+:~/workspace$ lua5.1 test.lua
+lua5.1: test.lua:7: wrong number of items
+stack traceback:
+        [C]: in function 'assert'
+        test.lua:7: in main chunk
+        [C]: ?
+</pre>
+
+<h3>Implementing a simple Shake runner</h3>
+
 <p>Here we show how to use the Shake API to implement runners. Note that if you just want to
 execute tests, the built in runners (command line and CGILua app) may be enough. On the other hand,
 if you need to show more detailed information about the tests results or if you want to use Shake as part
 of your application runtime, then you will need to use the Shake API.</p>
-
-<h3>A simple runner</h3>
 
 <p>The minimal Shake runner would be like:</p>
 
@@ -141,7 +207,7 @@ end
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: examples.html,v 1.3 2007/12/14 19:08:32 carregal Exp $</small></p>
+	<p><small>$Id: examples.html,v 1.4 2007/12/21 19:00:38 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
