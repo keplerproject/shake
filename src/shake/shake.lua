@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.10 2007/12/14 19:14:41 carregal Exp $
+-- $Id: shake.lua,v 1.11 2007/12/21 15:08:51 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -57,6 +57,15 @@ local function _loadfile(filename)
         f, errmsg = _loadstring(s, filename)
     end
     return f, errmsg
+end
+
+-- Version of dostring that stirs the string before executing it
+local function _dostring(s, filename)
+  local results = {pcall(_loadstring(s, filename))}
+     if results[1] then
+         table.remove(results, 1)
+     end
+     return unpack(results)
 end
 
 -- Version of dofile that stirs the file before executing it
@@ -145,11 +154,16 @@ local function _test(self, filename, title)
         local _print = _G.print
         local _write = _G.io.write
         local ___STIR_assert = _G.___STIR_assert
-        local lf = loadfile
-        local df = dofile
+        local lf = _G.loadfile
+        local df = _G.dofile
+	local ls = _G.loadstring
+        local ds = _G.dostring
 
         _G.loadfile = _loadfile
         _G.dofile = _dofile
+	_G.loadstring = _loadstring
+	_G.dostring = _dostring
+	
         
         local suite = _newsuite(filename, title)
 
@@ -187,7 +201,9 @@ local function _test(self, filename, title)
 
         -- restores the environment
         _G.loadfile = lf
-        _G.dofile = df        
+        _G.dofile = df
+	_G.loadstring = ls
+	_G.dostring = ds
         _G.print = _print
         _G.io.write = _write
         _G.___STIR_assert = ___STIR_assert
