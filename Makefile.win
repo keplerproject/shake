@@ -1,4 +1,4 @@
-# $Id: Makefile.win,v 1.4 2007/11/26 20:02:31 carregal Exp $
+# $Id: Makefile.win,v 1.5 2007/12/21 19:20:10 carregal Exp $
 
 include config.win
 
@@ -17,10 +17,10 @@ install:
     FOR %i IN ($(SHAKE_BINS)) DO copy %i $(SYS_BINDIR)\ 
     
 install_app:
-	IF NOT EXIST $(CGILUA_APPSDIR) mkdir $(CGILUA_APPSDIR)
-	IF NOT EXIST $(CGILUA_APPSDIR)\shake mkdir $(CGILUA_APPSDIR)\shake
-	IF NOT EXIST $(CGILUA_APPSDIR)\shake\css mkdir $(CGILUA_APPSDIR)\shake\css
-	IF NOT EXIST $(CGILUA_APPSDIR)\shake\img mkdir $(CGILUA_APPSDIR)\shake\img
-	FOR %i IN ($(APP_FILES)) DO copy %i $(CGILUA_APPSDIR)\shake 
-	FOR %i IN ($(APP_CSS)) DO copy %i $(CGILUA_APPSDIR)\shake\css
-	FOR %i IN ($(APP_IMG)) DO copy %i $(CGILUA_APPSDIR)\shake\img
+	IF NOT EXIST "$(CGILUA_APPSDIR)" mkdir "$(CGILUA_APPSDIR)"
+	IF NOT EXIST "$(CGILUA_APPSDIR)\shake" mkdir "$(CGILUA_APPSDIR)\shake"
+	IF NOT EXIST "$(CGILUA_APPSDIR)\shake\css" mkdir "$(CGILUA_APPSDIR)\shake\css"
+	IF NOT EXIST "$(CGILUA_APPSDIR)\shake\img" mkdir "$(CGILUA_APPSDIR)\shake\img"
+	FOR %i IN ($(APP_FILES)) DO copy %i "$(CGILUA_APPSDIR)\shake" 
+	FOR %i IN ($(APP_CSS)) DO copy %i "$(CGILUA_APPSDIR)\shake\css"
+	FOR %i IN ($(APP_IMG)) DO copy %i "$(CGILUA_APPSDIR)\shake\img"
