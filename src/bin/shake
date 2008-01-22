@@ -6,7 +6,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.14 2007/12/21 18:07:37 carregal Exp $
+-- $Id: shake,v 1.15 2008/01/22 21:02:51 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -96,4 +96,8 @@ if _tested then
     print(run:summary())
 else
     print("No test files found")
+end
+
+if run.results.errors > 0 then
+	os.exit(1)
 end
