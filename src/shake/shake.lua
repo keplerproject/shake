@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.12 2007/12/21 18:23:09 carregal Exp $
+-- $Id: shake.lua,v 1.13 2008/01/25 16:48:37 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -235,7 +235,7 @@ local function _summary(self, sep)
                 if context.failed > 0 then
                     out[#out + 1] = ""
                     for _, output in ipairs(context.output) do
-                        out[#out + 1] = output
+                        out[#out + 1] = _G.tostring(output)
                     end
                     if context.comments then
                       out[#out + 1] = context.comments

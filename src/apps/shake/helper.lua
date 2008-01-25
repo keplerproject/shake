@@ -95,7 +95,7 @@ function ReportModule(run)
                            cgilua.put([[<div class="shakecontext">]].."\n")
                            for _, output in ipairs(context.output) do
                                if output and output ~= "" then
-                                   cgilua.put([[<div class="shakeoutput">]]..output.."</div>\n")
+                                   cgilua.put([[<div class="shakeoutput">]]..tostring(output).."</div>\n")
                                end
                            end
                            if context.comments and context.comments ~= "" then
