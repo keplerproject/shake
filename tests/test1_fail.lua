@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: test1_fail.lua,v 1.2 2007/10/24 23:41:05 carregal Exp $
+-- $Id: test1_fail.lua,v 1.3 2008/03/17 20:03:51 carregal Exp $
 -------------------------------------------------------------------------------
 
 print("Forcing a failure")
@@ -29,3 +29,32 @@ assert (function() return end == 4 + 34)
 -- by using a multi line comment
 -- too
 assert(x == 6, "see?")
+
+local str = [[This is a multiline
+text that involves
+more than one line
+indeed]]
+
+print("Testing multiline asserts that fails")
+assert(str == [[This is
+a multiline
+text that
+fails]], "Multiline failed, but expectedly")
+
+print("Testing multiline asserts that fails - part 2")
+assert(str == [[This is
+a multiline text that also fails,
+but the point is what line numbers are
+reported]], "Multiline failed, but expectedly")
+
+print("Forcing a failure so we can check line number counting")
+assert(2 == 3, "What?")
+
+-- The tests below do not work yet, since Leg is considering the second assert
+-- as a single line
+--print("Testing multiline asserts that fails - part 3")
+--assert(nil, 1)
+--assert(nil
+--   , 2)
+--assert(0 == 1, 4)
+--assert(1 == 2, 5)
