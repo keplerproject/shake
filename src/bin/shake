@@ -6,7 +6,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake,v 1.16 2008/03/04 21:51:18 carregal Exp $
+-- $Id: shake,v 1.17 2008/03/18 21:00:37 carregal Exp $
 -------------------------------------------------------------------------------
 
 require"shake"
@@ -98,6 +98,6 @@ else
     print("No test files found")
 end
 
-if run.results.errors > 0 then
+if (run.results.errors > 0) or (run.results.failed > 0)  then
 	os.exit(1)
 end
