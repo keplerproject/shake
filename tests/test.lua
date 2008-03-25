@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: test.lua,v 1.2 2007/10/24 23:41:05 carregal Exp $
+-- $Id: test.lua,v 1.3 2008/03/25 14:59:53 carregal Exp $
 -------------------------------------------------------------------------------
 require"shake"
 
@@ -18,11 +18,11 @@ run:test("test1_ok.lua")
 run:test("test2_ok.lua")
 
 results = run.results
-assert(results.passed == 3, "Unexpected tests in results!")
+assert(results.passed == 6, "Unexpected tests in results!")
 assert(results.failed == 0, "Unexpected failures in results!")
 assert(results.errors == 0, "Unexpected errors in results!")
 assert(#results.suites == 2, "Unexpected suites in results!") 
-assert(#results.suites[1].contexts == 1, "Unexpected groups in results!")
+assert(#results.suites[1].contexts == 2, "Unexpected groups in results!")
 
 summary = run:summary()
 
@@ -35,7 +35,7 @@ run:test("test1_fail.lua")
 
 results = run.results
 assert(results.passed == 0, "Unexpected tests in results!")
-assert(results.failed == 6, "Unexpected failures in results!")
+assert(results.failed == 9, "Unexpected failures in results!")
 assert(results.errors == 0, "Unexpected errors in results!")
 
 summary = run:summary()
