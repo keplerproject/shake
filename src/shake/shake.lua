@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.14 2008/03/17 17:20:43 carregal Exp $
+-- $Id: shake.lua,v 1.15 2008/03/25 12:43:22 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -48,15 +48,15 @@ end
 
 -- Version of loadfile that stirs the file before compiling it
 local function _loadfile(filename)
-    local f
-    local file = io.open(filename)
+    local file, func, errmsg
+    file, errmsg = io.open(filename)
     if not file then
-        return
+        return nil, errmsg
     else
-        local s = file:read'*a'
-        f, errmsg = _loadstring(s, filename)
+        local str = file:read'*a'
+        func, errmsg = _loadstring(str, filename)
     end
-    return f, errmsg
+    return func, errmsg
 end
 
 -- Version of dostring that stirs the string before executing it
