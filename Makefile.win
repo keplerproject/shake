@@ -1,4 +1,4 @@
-# $Id: Makefile.win,v 1.5 2007/12/21 19:20:10 carregal Exp $
+# $Id: Makefile.win,v 1.6 2008/04/29 20:58:30 carregal Exp $
 
 include config.win
 
@@ -11,10 +11,10 @@ APP_IMG = src\apps\shake\img\shake.gif
 
 install:
 	IF NOT EXIST $(LUA_DIR) mkdir $(LUA_DIR)
-	IF NOT EXIST $(LUA_DIR)\shake mkdir $(LUA_DIR)\shake
-	FOR %i IN ($(SHAKE_LUAS)) DO copy %i $(LUA_DIR)\shake 
-	copy $(ROOT_LUAS) $(LUA_DIR)\ 
-    FOR %i IN ($(SHAKE_BINS)) DO copy %i $(SYS_BINDIR)\ 
+	IF NOT EXIST "$(LUA_DIR)\shake" mkdir "$(LUA_DIR)\shake"
+	FOR %i IN ($(SHAKE_LUAS)) DO copy "%i" "$(LUA_DIR)\shake" 
+	copy "$(ROOT_LUAS)" "$(LUA_DIR)\" 
+    FOR %i IN ($(SHAKE_BINS)) DO copy "%i" "$(SYS_BINDIR)\" 
     
 install_app:
 	IF NOT EXIST "$(CGILUA_APPSDIR)" mkdir "$(CGILUA_APPSDIR)"
