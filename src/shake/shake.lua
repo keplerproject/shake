@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.15 2008/03/25 12:43:22 carregal Exp $
+-- $Id: shake.lua,v 1.16 2008/07/04 21:11:59 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -217,6 +217,17 @@ local function _test(self, filename, title)
 end
 
 -------------------------------------------------------------------------------
+-- Displays values as nice strings
+-------------------------------------------------------------------------------
+local function _tostring(s)
+	if type(s) == "string" then
+		return [["]]..s..[["]]
+	else
+		return _G.tostring(s)
+	end
+end
+
+-------------------------------------------------------------------------------
 -- Returns a summary of the test results using an optional line separator
 -------------------------------------------------------------------------------
 local function _summary(self, sep)
@@ -247,11 +258,11 @@ local function _summary(self, sep)
                             end
                             
                             if not isTerminal(test.exp1, test.val1) then
-                                out[#out + 1] = "   "..test.exp1.." -> ".._G.tostring(test.val1)
+                                out[#out + 1] = "   "..test.exp1.." -> ".._tostring(test.val1)
                             end
                             
                             if not isTerminal(test.exp2, test.val2) then
-                                out[#out + 1] = "   "..test.exp2.." -> ".._G.tostring(test.val2)
+                                out[#out + 1] = "   "..test.exp2.." -> ".._tostring(test.val2)
                             end
                         end
                     end
