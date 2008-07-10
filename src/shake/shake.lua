@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.16 2008/07/04 21:11:59 carregal Exp $
+-- $Id: shake.lua,v 1.17 2008/07/10 16:19:44 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -220,7 +220,7 @@ end
 -- Displays values as nice strings
 -------------------------------------------------------------------------------
 local function _tostring(s)
-	if type(s) == "string" then
+	if _G.type(s) == "string" then
 		return [["]]..s..[["]]
 	else
 		return _G.tostring(s)
