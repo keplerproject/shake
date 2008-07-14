@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.17 2008/07/10 16:19:44 carregal Exp $
+-- $Id: shake.lua,v 1.18 2008/07/14 21:10:14 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -12,8 +12,8 @@ local lfs = require "lfs"
 local table = require "table"
 local string = require "string"
 
-local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv, loadfile, dofile =
-      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv, loadfile, dofile
+local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
+      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
 
 require "shake.stir"
 
@@ -38,44 +38,6 @@ _DESCRIPTION = "Shake is a simple and transparent test engine for Lua that assum
 _VERSION = "Shake 1.0.2"
 
 ----------- local functions ------------
-
--- Version of loadstring that stirs the file before compiling it
-local function _loadstring(s, filename)
-    s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of an eventual one with a #! at the start\n")
-    s = stir(s)
-    return loadstring(s, filename)    
-end
-
--- Version of loadfile that stirs the file before compiling it
-local function _loadfile(filename)
-    local file, func, errmsg
-    file, errmsg = io.open(filename)
-    if not file then
-        return nil, errmsg
-    else
-        local str = file:read'*a'
-        func, errmsg = _loadstring(str, filename)
-    end
-    return func, errmsg
-end
-
--- Version of dostring that stirs the string before executing it
-local function _dostring(s, filename)
-  local results = {pcall(_loadstring(s, filename))}
-     if results[1] then
-         table.remove(results, 1)
-     end
-     return unpack(results)
-end
-
--- Version of dofile that stirs the file before executing it
-local function _dofile(filename)
-    local results = {pcall(_loadfile(filename))}
-    if results[1] then
-        table.remove(results, 1)
-    end
-    return unpack(results)
-end
 
 -- Returns a new suite
 local function _newsuite(filename, title, errmsg)
@@ -136,36 +98,62 @@ function _newassert(suite, context)
     end
 end
 
+local _loadstring = function() end
+
+-- Version of loadfile that stirs the file before compiling it
+local function _loadfile(self, filename, title)
+    local file, func, errmsg
+    file, errmsg = io.open(filename)
+    if not file then
+        return nil, errmsg
+    else
+        local str = file:read'*a'
+        func, errmsg = _loadstring(self, str, filename, title)
+    end
+    return func, errmsg
+end
+
+-- Version of dofile that stirs the file before executing it
+local function _dofile(self, filename, title)
+    local results = {pcall(_loadfile(self, filename, title))}
+    if results[1] then
+        table.remove(results, 1)
+    end
+    return unpack(results)
+end
+
 -------------------------------------------------------------------------------
--- Runs a suite of tests from filename using a title
--- Test results are added to the results table
+-- Prepares a suite of tests from a string using an optional title
+-- When running, test results are added to the results table
 -------------------------------------------------------------------------------
-local function _test(self, filename, title)
-    f, errmsg = _loadfile(filename)
+function _loadstring(self, s, chunckname, title)
+    s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of an eventual one with a #! at the start\n")
+    s = stir(s)
+    f, errmsg = loadstring(s, chunckname)
+
     local results = self.results
     title = title or ""
     if not f then
-        -- error loading the file
-        errmsg = string.gsub(errmsg, '%[string "'..filename..'"%]', filename)
-        results.suites[#results.suites + 1] = _newsuite(filename, title, errmsg)
+        -- error loading the string
+        errmsg = string.gsub(errmsg, '%[string "'..chunckname..'"%]', chunckname)
+        results.suites[#results.suites + 1] = _newsuite(chunckname, title, errmsg)
         results.errors = results.errors + 1
-    else
+    else return function(...)
         -- runs the test suite
         local _print = _G.print
         local _write = _G.io.write
         local ___STIR_assert = _G.___STIR_assert
+        
         local lf = _G.loadfile
         local df = _G.dofile
-	local ls = _G.loadstring
-        local ds = _G.dostring
+		local ls = _G.loadstring
 
-        _G.loadfile = _loadfile
-        _G.dofile = _dofile
-	_G.loadstring = _loadstring
-	_G.dostring = _dostring
+        _G.loadfile = function(name) return _loadfile(self, name, title) end
+        _G.dofile = function (name) return _dofile(self, name, title) end
+		_G.loadstring = function(str, name) return _loadstring(self, str, name, title) end
 	
         
-        local suite = _newsuite(filename, title)
+        local suite = _newsuite(chunckname, title)
 
         local context = _newcontext("")
         _G.___STIR_assert = _newassert(suite, context) -- so assertions works even without a previous context
@@ -198,7 +186,7 @@ local function _test(self, filename, title)
         if not res then
             -- error executing the suite
             errmsg = errmsg or ""
-            suite.error = string.gsub(errmsg, '%[string "'..filename..'"%]', filename)
+            suite.error = string.gsub(errmsg, '%[string "'..chunckname..'"%]', chunckname)
             results.errors = results.errors + 1
         end
         results.passed = results.passed + suite.passed
@@ -208,11 +196,11 @@ local function _test(self, filename, title)
         -- restores the environment
         _G.loadfile = lf
         _G.dofile = df
-	_G.loadstring = ls
-	_G.dostring = ds
+		_G.loadstring = ls
         _G.print = _print
         _G.io.write = _write
         _G.___STIR_assert = ___STIR_assert
+        end -- returned function
     end
 end
 
@@ -282,7 +270,6 @@ local function _summary(self, sep)
 end 
 
 
-
 ----------                    Public functions                   --------------
 
 
@@ -293,7 +280,7 @@ end
 -------------------------------------------------------------------------------
 function runner()
     local runner = {results = {passed = 0, failed = 0, errors = 0, suites = {} } }
-    setmetatable(runner, {__index = {test = _test, summary = _summary} })
+    setmetatable(runner, {__index = {test = _dofile, summary = _summary} })
     return runner
 end
 
