@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.18 2008/07/14 21:10:14 carregal Exp $
+-- $Id: shake.lua,v 1.19 2008/07/16 18:32:10 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -40,11 +40,11 @@ _VERSION = "Shake 1.0.2"
 ----------- local functions ------------
 
 -- Returns a new suite
-local function _newsuite(filename, title, errmsg)
+local function _newsuite(s, filename, title, errmsg)
     local source = {}
     if not errmsg then
-        for line in io.lines(filename) do
-                source[#source + 1] = line
+        for line in s:gmatch(".-\r?\n") do
+			source[#source + 1] = line
         end
     end
     return {title = title, filename = filename, passed = 0, failed = 0, error = errmsg, source = source, contexts = {} }
@@ -127,16 +127,16 @@ end
 -- When running, test results are added to the results table
 -------------------------------------------------------------------------------
 function _loadstring(self, s, chunckname, title)
-    s = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of an eventual one with a #! at the start\n")
-    s = stir(s)
-    f, errmsg = loadstring(s, chunckname)
+    local s2 = string.gsub(s, "^#![^\n]*\n", "-- keeps one line in place of an eventual one with a #! at the start\n")
+    s2 = stir(s2)
+    f, errmsg = loadstring(s2, chunckname)
 
     local results = self.results
     title = title or ""
     if not f then
         -- error loading the string
         errmsg = string.gsub(errmsg, '%[string "'..chunckname..'"%]', chunckname)
-        results.suites[#results.suites + 1] = _newsuite(chunckname, title, errmsg)
+        results.suites[#results.suites + 1] = _newsuite(s, chunckname, title, errmsg)
         results.errors = results.errors + 1
     else return function(...)
         -- runs the test suite
@@ -153,7 +153,7 @@ function _loadstring(self, s, chunckname, title)
 		_G.loadstring = function(str, name) return _loadstring(self, str, name, title) end
 	
         
-        local suite = _newsuite(chunckname, title)
+        local suite = _newsuite(s, chunckname, title)
 
         local context = _newcontext("")
         _G.___STIR_assert = _newassert(suite, context) -- so assertions works even without a previous context

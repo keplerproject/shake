@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: test.lua,v 1.5 2008/07/14 21:11:09 carregal Exp $
+-- $Id: test.lua,v 1.6 2008/07/16 18:32:10 carregal Exp $
 -------------------------------------------------------------------------------
 require"shake"
 
@@ -33,10 +33,11 @@ assert(string.find(summary, "has an error!!!") == nil, "Summary contains an erro
 -- checks if Shake is detecting failures
 run = shake.runner()
 run:test("test1_fail.lua")
+run:test("test_multiple_fail.lua")
 
 results = run.results
 assert(results.passed == 0, "Unexpected tests in results!")
-assert(results.failed == 9, "Unexpected failures in results!")
+assert(results.failed == 18, "Unexpected failures in results!")
 assert(results.errors == 0, "Unexpected errors in results!")
 
 summary = run:summary()
