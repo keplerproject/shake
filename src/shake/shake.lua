@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.20 2008/07/16 18:38:51 carregal Exp $
+-- $Id: shake.lua,v 1.21 2008/07/16 18:40:32 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -242,7 +242,7 @@ local function _summary(self, sep)
                     for ct, test in ipairs (context.tests) do
                         if not test.passed then
                             if suite.source[test.linenumber] then
-                                out[#out + 1] = "   #"..test.linenumber.." "..suite.source[test.linenumber].."***"
+                                out[#out + 1] = "   #"..test.linenumber.." "..suite.source[test.linenumber]
                             end
                             
                             if not isTerminal(test.exp1, test.val1) then
