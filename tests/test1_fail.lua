@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: test1_fail.lua,v 1.3 2008/03/17 20:03:51 carregal Exp $
+-- $Id: test1_fail.lua,v 1.4 2008/07/17 17:12:58 carregal Exp $
 -------------------------------------------------------------------------------
 
 print("Forcing a failure")
@@ -58,3 +58,14 @@ assert(2 == 3, "What?")
 --   , 2)
 --assert(0 == 1, 4)
 --assert(1 == 2, 5)
+
+print("Trying to call an user assert function")
+local t = {["assert"] = function() end}
+t.assert(x == 2) -- should be shaken but not stirred
+
+print("Trying to call the global assert but disguised as a table field")
+local base = _G
+base.assert(x == true) -- Should be captured as a valid test but without the metadata
+
+-- last test
+assert(x == false)

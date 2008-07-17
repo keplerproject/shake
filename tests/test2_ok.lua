@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: test2_ok.lua,v 1.2 2008/03/25 14:59:53 carregal Exp $
+-- $Id: test2_ok.lua,v 1.3 2008/07/17 17:12:58 carregal Exp $
 -------------------------------------------------------------------------------
 
 print("This simple test always passes")
@@ -18,3 +18,7 @@ print("Trying to load a non existent file")
 local f, err = loadfile("__N_0_f_i_l_3")
 assert (f == nil)
 assert (err)
+
+print("Trying to call an user assert function")
+local t = {["assert"] = function() end}
+t.assert(x == true) -- should be shaken but not stirred

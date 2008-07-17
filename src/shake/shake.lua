@@ -4,7 +4,7 @@
 -- Authors: Andre Carregal, Humberto dos Anjos
 -- Copyright (c) 2007 Kepler Project
 --
--- $Id: shake.lua,v 1.21 2008/07/16 18:40:32 carregal Exp $
+-- $Id: shake.lua,v 1.22 2008/07/17 17:12:58 carregal Exp $
 -------------------------------------------------------------------------------
 
 local io = require "io"
@@ -42,6 +42,7 @@ _VERSION = "Shake 1.0.2"
 -- Returns a new suite
 local function _newsuite(s, filename, title, errmsg)
     local source = {}
+    filename = filename or ""
     if not errmsg then
         for line in s:gmatch("(.-)\r?\n") do
 			source[#source + 1] = line
