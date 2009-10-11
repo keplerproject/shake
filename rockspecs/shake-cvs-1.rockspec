@@ -1,8 +1,7 @@
 package = "Shake"
 version = "cvs-1"
 source = {
-   url = "cvs://:pserver:anonymous:@cvs.luaforge.net:/cvsroot/shake",
-   cvs_tag = "HEAD",
+   url = "git://github.com/keplerproject/shake.git",
 }
 description = {
    summary = "A Simple Lua Test Engine",
