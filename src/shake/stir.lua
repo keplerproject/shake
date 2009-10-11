@@ -200,15 +200,26 @@ local function buildNewAssert(info, assertName)
   local str2 = (exp2 == nil) and 'nil' or scanner.text2string(exp2)
   local com = (comment == nil) and 'nil' or scanner.text2string(comment)
   local textStr = scanner.text2string(text)
-  return newassert..assertName..'('..exp1
+  local func
+  if not op then
+     func = [[function () assert_not_nil(a) end]]
+  elseif op == '==' then
+     func = [[function () assert_equal(a, b) end]]
+  elseif op == '~=' then
+     func = [[function () assert_not_equal(a, b) end]]
+  end
+  local stir = [[___STIR_id((function (a, b) return ]]..newassert..assertName..'(a'
     ..', '..(op and '"'..op..'"' or 'nil')
-    ..', '..(exp2 or 'nil')
+    ..', b '
     ..', '..(msg or 'nil')
     ..', '..str1
     ..', '..str2
     ..', '..com
     ..', '..textStr
-    ..')'
+    ..', '..func
+    ..') end)('..exp1..', '..(exp2 or 'nil')..'))'
+  --print(stir)
+  return stir
 end
 
 -- replaces str's substring from i to j with new_str

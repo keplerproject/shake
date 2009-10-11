@@ -51,7 +51,7 @@ print("Forcing a failure so we can check line number counting")
 assert(2 == 3, "What?")
 
 -- The tests below do not work yet, since Leg is considering the second assert
--- as a single line
+tes-- as a single line
 --print("Testing multiline asserts that fails - part 3")
 --assert(nil, 1)
 --assert(nil
@@ -59,13 +59,13 @@ assert(2 == 3, "What?")
 --assert(0 == 1, 4)
 --assert(1 == 2, 5)
 
-print("Trying to call an user assert function")
-local t = {["assert"] = function() end}
-t.assert(x == 2) -- should be shaken but not stirred
+--print("Trying to call an user assert function")
+--local t = {["assert"] = function() end}
+--t.assert(x == 2) -- should be shaken but not stirred
 
-print("Trying to call the global assert but disguised as a table field")
-local base = _G
-base.assert(x == true) -- Should be captured as a valid test but without the metadata
+--print("Trying to call the global assert but disguised as a table field")
+--local base = _G
+--base.assert(x == true) -- Should be captured as a valid test but without the metadata
 
 -- last test
 assert(x == false)

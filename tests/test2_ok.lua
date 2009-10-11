@@ -19,6 +19,6 @@ local f, err = loadfile("__N_0_f_i_l_3")
 assert (f == nil)
 assert (err)
 
-print("Trying to call an user assert function")
-local t = {["assert"] = function() end}
-t.assert(x == true) -- should be shaken but not stirred
+--print("Trying to call an user assert function")
+--local t = {["assert"] = function() end}
+--t.assert(x == true) -- should be shaken but not stirred

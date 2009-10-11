@@ -12,8 +12,10 @@ local lfs = require "lfs"
 local table = require "table"
 local string = require "string"
 
-local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv =
-      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv
+local _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv,
+       loadfile, dofile, tostring, type, pairs, print =
+      _G, error, unpack, loadstring, pcall, xpcall, ipairs, setmetatable, setfenv, loadfile,
+       dofile, tostring, type, pairs, print
 
 require "shake.stir"
 
@@ -158,6 +160,7 @@ function _loadstring(self, s, chunckname, title)
 
         local context = _newcontext("")
         _G.___STIR_assert = _newassert(suite, context) -- so assertions works even without a previous context
+	_G.___STIR_id = function (...) return ... end
         suite.contexts[#suite.contexts + 1] = context
         
         -- separate contexts at every print or io.write
@@ -271,6 +274,131 @@ local function _summary(self, sep)
 end 
 
 
+-- Returns a new context
+local function _newcontext_tsc(...)
+   local args = { ... }
+   for i = 1, #args do args[i] = tostring(args[i]) end
+   return { parent = 0, name = table.concat(args, ", "), context = true }
+end
+
+local function transform_comments(s)
+  return s:gsub("%-%-%s*", ""):gsub("\n", ", "):gsub("\r", "")
+end
+
+-- Returns a contextualized assert()
+--
+
+function _newassert_tsc(contexts, context)
+    local parent = #contexts
+    return function(val1, op, val2, msg, exp1, exp2, comments, str, func)
+        context.has_asserts = true
+
+        if comments then
+            context = _newcontext_tsc(transform_comments(comments))
+            contexts[#contexts + 1] = context
+            parent = #contexts
+        end        
+        
+	if not msg then
+	  if op then msg = (exp1 .. ' ' .. op .. ' ' .. exp2) else msg = exp1 end
+	end
+
+        local test = { parent = parent, name = msg, test = func }
+        contexts[#contexts + 1] = test
+
+        --test.linenumber = getinfo(2, "l").currentline
+        --test.traceback = traceback("", 2)
+    end
+end
+
+local function _loadstring_tsc(s, name)
+    local s2 = string.gsub(s, "^#![^\n]*\n", 
+        "-- keeps one line in place of an eventual one with a #! at the start\n")
+    s2 = stir(s2)
+    return loadstring(s2, name)
+end
+
+-- Version of loadfile that stirs the file before compiling it
+local function _loadfile_tsc(filename)
+    local file, func, errmsg
+    file, errmsg = io.open(filename)
+    if not file then
+        return nil, errmsg
+    else
+        local str = file:read'*a'
+        func, errmsg = _loadstring_tsc(str, filename)
+    end
+    return func, errmsg
+end
+
+-------------------------------------------------------------------------------
+-- Runs a suite of tests from filename using a title
+-- Test results are added to the results table
+-------------------------------------------------------------------------------
+local function _test(filename, contexts)
+    f, errmsg = _loadfile_tsc(filename)
+    if not f then
+       error("cannot load file " .. filename .. ": " .. errmsg)
+    else
+        -- runs the test suite
+        local _print = _G.print
+        local _write = _G.io.write
+        local ___STIR_assert = _G.___STIR_assert
+        --local lf = _G.loadfile
+        --local df = _G.dofile
+        --local ls = _G.loadstring
+        --local ds = _G.dostring
+        --_G.loadfile = _loadfile
+        --_G.dofile = _dofile
+        --_G.loadstring = _loadstring
+        --_G.dostring = _dostring
+        
+       local context = _newcontext_tsc()
+        _G.___STIR_assert = _newassert_tsc(contexts, context) -- so assertions works even without a previous context
+	_G.___STIR_id = function (...) return ... end
+       contexts[#contexts + 1] = context
+        
+        -- separate contexts at every print or io.write
+        -- keeping the output stored in the context table
+        _G.print = function(...)
+            if context.has_asserts then
+                -- create a new context if there was an assert before the previous context
+                context = _newcontext_tsc(...)
+                contexts[#contexts + 1] = context
+            else
+                -- converts all parameters to strings
+                local temp = {}
+                local args = { context.name, ... }
+                for i = 1, #args do 
+                   local s = tostring(args[i])
+                   if s ~= "" then temp[#temp + 1] = s end
+                end
+                -- and concatenates them
+                context.name = table.concat(temp, ", ")
+            end
+            _G.___STIR_assert = _newassert_tsc(contexts, context)
+        end
+        
+        _G.io.write = _G.print
+        
+        -- executes the suite
+        local res, errmsg = xpcall(f, function(err) return err end)
+        if not res then
+            -- error executing the suite
+            error("cannot load contexts from file " .. filename .. ": " .. errmsg)
+        end
+
+        -- restores the environment
+        --_G.loadfile = lf
+        --_G.dofile = df
+        --_G.loadstring = ls
+        --_G.dostring = ds
+        _G.print = _print
+        _G.io.write = _write
+        _G.___STIR_assert = ___STIR_assert
+    end
+end
+
 ----------                    Public functions                   --------------
 
 
@@ -284,6 +412,11 @@ function runner()
     setmetatable(runner, {__index = {test = _dofile, summary = _summary} })
     return runner
 end
+
+function load_contexts(filename, contexts)
+  _test(filename, contexts)
+end
+
 
 -------------------------------------------------------------------------------
 -- Checks if an expression string represents a terminal value
