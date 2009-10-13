@@ -202,13 +202,14 @@ local function buildNewAssert(info, assertName)
   local textStr = scanner.text2string(text)
   local func
   if not op then
-     func = [[function () assert_not_nil(a) end]]
+    func = [[(function () assert_not_nil(a) end)]]
   elseif op == '==' then
-     func = [[function () assert_equal(a, b) end]]
+    func = [[(function () assert_equal(a, b) end)]]
   elseif op == '~=' then
-     func = [[function () assert_not_equal(a, b) end]]
+    func = [[(function () assert_not_equal(a, b) end)]]
   end
-  local stir = [[___STIR_id((function (a, b) return ]]..newassert..assertName..'(a'
+  local stir = [[xpcall((function () local a = ]] .. exp1 .. [[; local b = ]] ..
+      (exp2 or 'nil') .. [[; return ]]..newassert..assertName..'(a'
     ..', '..(op and '"'..op..'"' or 'nil')
     ..', b '
     ..', '..(msg or 'nil')
@@ -217,7 +218,13 @@ local function buildNewAssert(info, assertName)
     ..', '..com
     ..', '..textStr
     ..', '..func
-    ..') end)('..exp1..', '..(exp2 or 'nil')..'))'
+  ..[[) end), (function (e) ___STIR_error(]] 
+    ..str1
+    ..', '..(op and '"'..op..'"' or 'nil')
+    ..', '..str2
+    ..', '..(msg or 'nil')
+    ..', '..com
+    ..', '..textStr .. [[, debug.traceback()) end))]]
   --print(stir)
   return stir
 end

@@ -160,7 +160,7 @@ function _loadstring(self, s, chunckname, title)
 
         local context = _newcontext("")
         _G.___STIR_assert = _newassert(suite, context) -- so assertions works even without a previous context
-	_G.___STIR_id = function (...) return ... end
+	_G.___STIR_error = error
         suite.contexts[#suite.contexts + 1] = context
         
         -- separate contexts at every print or io.write
@@ -291,7 +291,7 @@ end
 function _newassert_tsc(contexts, context)
     local parent = #contexts
     return function(val1, op, val2, msg, exp1, exp2, comments, str, func)
-        context.has_asserts = true
+        if context then context.has_asserts = true end
 
         if comments then
             context = _newcontext_tsc(transform_comments(comments))
@@ -308,13 +308,19 @@ function _newassert_tsc(contexts, context)
 
         --test.linenumber = getinfo(2, "l").currentline
         --test.traceback = traceback("", 2)
-    end
+      end, function (str1, op, str2, msg, com, str, e)
+	     if not msg then
+	       if op then msg = (str1 .. ' ' .. op .. ' ' .. str2) else msg = str1 end
+	     end
+	     contexts[#contexts + 1] =
+	       { parent = parent, name = msg, test = function () error(e) end } 
+	   end
 end
 
 local function _loadstring_tsc(s, name)
     local s2 = string.gsub(s, "^#![^\n]*\n", 
         "-- keeps one line in place of an eventual one with a #! at the start\n")
-    s2 = stir(s2)
+    s2 = stir(s2) ; --print(s2)
     return loadstring(s2, name)
 end
 
@@ -353,15 +359,13 @@ local function _test(filename, contexts)
         --_G.loadstring = _loadstring
         --_G.dostring = _dostring
         
-       local context = _newcontext_tsc()
-        _G.___STIR_assert = _newassert_tsc(contexts, context) -- so assertions works even without a previous context
-	_G.___STIR_id = function (...) return ... end
-       contexts[#contexts + 1] = context
+        local context 
+        _G.___STIR_assert, _G.___STIR_error = _newassert_tsc(contexts, context) -- so assertions works even without a previous context
         
         -- separate contexts at every print or io.write
         -- keeping the output stored in the context table
         _G.print = function(...)
-            if context.has_asserts then
+            if (not context) or context.has_asserts then
                 -- create a new context if there was an assert before the previous context
                 context = _newcontext_tsc(...)
                 contexts[#contexts + 1] = context

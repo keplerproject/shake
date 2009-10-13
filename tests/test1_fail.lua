@@ -50,8 +50,7 @@ reported]], "Multiline failed, but expectedly")
 print("Forcing a failure so we can check line number counting")
 assert(2 == 3, "What?")
 
--- The tests below do not work yet, since Leg is considering the second assert
-tes-- as a single line
+-- The tests below do not work yet, since Leg is considering the second assert as a single line
 --print("Testing multiline asserts that fails - part 3")
 --assert(nil, 1)
 --assert(nil
